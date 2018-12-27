@@ -3,12 +3,12 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.oneconfig</groupId>
-    <artifactId>oneconfig-core</artifactId>
+    <artifactId>oneconfig-utils</artifactId>
     <!-- <packaging>war</packaging> -->
 
     <version>1.0-SNAPSHOT</version>
 
-    <name>core</name>
+    <name>utils</name>
     <build>
         <plugins>
             <plugin>
@@ -97,11 +97,6 @@
             <version>1.60</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.oneconfig</groupId>
-            <artifactId>oneconfig-utils</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
     <properties>
         <jersey.version>2.26</jersey.version>

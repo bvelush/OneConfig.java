@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oneconfig.core.stores.EncJsonStore;
 import com.oneconfig.core.stores.IStore;
 import com.oneconfig.core.stores.JsonStore;
-import com.oneconfig.core.utils.ResourceLoader;
+import com.oneconfig.utils.common.ResourceLoader;
 
 public class OneConfig {
     private Map<String, IStore> stores;

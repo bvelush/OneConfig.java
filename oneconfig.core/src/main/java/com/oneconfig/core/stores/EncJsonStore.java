@@ -9,7 +9,7 @@ import java.util.Collection;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oneconfig.core.OneConfigException;
-import com.oneconfig.core.utils.ResourceLoader;
+import com.oneconfig.utils.common.ResourceLoader;
 
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.cms.CMSEnvelopedData;

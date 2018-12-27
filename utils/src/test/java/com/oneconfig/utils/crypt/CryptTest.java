@@ -1,4 +1,4 @@
-package com.oneconfig.core.utils;
+package com.oneconfig.utils.crypt;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

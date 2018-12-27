@@ -1,4 +1,4 @@
-package com.oneconfig.core.utils;
+package com.oneconfig.utils.crypt;
 
 public class CryptException extends RuntimeException {
 

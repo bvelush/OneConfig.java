@@ -1,4 +1,4 @@
-package com.oneconfig.core.utils;
+package com.oneconfig.utils.common;
 
 import java.io.File;
 import java.io.FileInputStream;

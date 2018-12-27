@@ -1,4 +1,4 @@
-package com.oneconfig.core.utils;
+package com.oneconfig.utils.crypt;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +15,8 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.spec.MGF1ParameterSpec;
+
+import com.oneconfig.utils.common.ResourceLoader;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
