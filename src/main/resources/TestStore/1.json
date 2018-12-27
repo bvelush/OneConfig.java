@@ -1,0 +1,22 @@
+{
+    "init": {
+        "stores": {
+            "safe": {
+                "type": "json-enc",
+                "path": "secjson-path",
+                "cert": "thumbprint"
+            },
+            "sre": {
+                "type": "sre-online",
+                "url": "https://sre.huawei.internal/getpassword",
+                "auth": "{$safe.sre.pwd}"
+            }
+        }
+    },
+    "web": {
+        "db": {
+            "server": "172.11.12.13",
+            "pwd": "{$safe.our-service-key}"
+        }
+    }
+}
