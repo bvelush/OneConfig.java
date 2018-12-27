@@ -1,4 +1,4 @@
-package com.huawei.cloud.oneconfig;
+package com.oneconfig.core;
 
 public class OneConfigException extends RuntimeException {
 

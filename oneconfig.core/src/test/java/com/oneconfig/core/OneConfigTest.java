@@ -1,4 +1,4 @@
-package com.huawei.cloud.oneconfig;
+package com.oneconfig.core;
 
 import org.junit.Test;
 

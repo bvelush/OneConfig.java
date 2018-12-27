@@ -1,4 +1,4 @@
-package com.huawei.cloud.oneconfig.stores;
+package com.oneconfig.core.stores;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -8,8 +8,8 @@ import java.util.Collection;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.huawei.cloud.oneconfig.OneConfigException;
-import com.huawei.cloud.oneconfig.utils.ResourceLoader;
+import com.oneconfig.core.OneConfigException;
+import com.oneconfig.core.utils.ResourceLoader;
 
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.cms.CMSEnvelopedData;

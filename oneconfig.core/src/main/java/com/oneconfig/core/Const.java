@@ -1,4 +1,4 @@
-package com.huawei.cloud.oneconfig;
+package com.oneconfig.core;
 
 public class Const {
     public static final int MAX_LEVELS = 10;

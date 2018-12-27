@@ -1,4 +1,4 @@
-package com.huawei.cloud.oneconfig.utils;
+package com.oneconfig.core.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -1,4 +1,4 @@
-package com.huawei.cloud.oneconfig.utils;
+package com.oneconfig.core.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

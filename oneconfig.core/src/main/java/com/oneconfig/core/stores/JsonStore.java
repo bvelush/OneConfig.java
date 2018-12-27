@@ -1,8 +1,8 @@
-package com.huawei.cloud.oneconfig.stores;
+package com.oneconfig.core.stores;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.huawei.cloud.oneconfig.Const;
-import com.huawei.cloud.oneconfig.OneConfigException;
+import com.oneconfig.core.Const;
+import com.oneconfig.core.OneConfigException;
 
 public class JsonStore implements IStore {
     private String name;

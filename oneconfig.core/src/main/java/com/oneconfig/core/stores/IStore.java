@@ -1,4 +1,4 @@
-package com.huawei.cloud.oneconfig.stores;
+package com.oneconfig.core.stores;
 
 public interface IStore {
     void init(String name, Object configObject);

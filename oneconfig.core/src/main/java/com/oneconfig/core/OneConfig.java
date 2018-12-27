@@ -1,4 +1,4 @@
-package com.huawei.cloud.oneconfig;
+package com.oneconfig.core;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -10,10 +10,10 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.huawei.cloud.oneconfig.stores.EncJsonStore;
-import com.huawei.cloud.oneconfig.stores.IStore;
-import com.huawei.cloud.oneconfig.stores.JsonStore;
-import com.huawei.cloud.oneconfig.utils.ResourceLoader;
+import com.oneconfig.core.stores.EncJsonStore;
+import com.oneconfig.core.stores.IStore;
+import com.oneconfig.core.stores.JsonStore;
+import com.oneconfig.core.utils.ResourceLoader;
 
 public class OneConfig {
     private Map<String, IStore> stores;

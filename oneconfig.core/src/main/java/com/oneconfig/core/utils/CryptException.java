@@ -1,4 +1,4 @@
-package com.huawei.cloud.oneconfig.utils;
+package com.oneconfig.core.utils;
 
 public class CryptException extends RuntimeException {
 
