@@ -1,0 +1,30 @@
+{
+    "run": {
+        "default": "",
+        "items": [
+            {
+                "name": "oneconfig",
+                "projectName": "oneconfig",
+                "workingDirectory": "d:\\dev\\OneConfig",
+                "args": [],
+                "vmargs": [],
+                "env": {},
+                "preLaunchTask": ""
+            }
+        ]
+    },
+    "debug": {
+        "default": "",
+        "items": [
+            {
+                "name": "oneconfig",
+                "projectName": "oneconfig",
+                "workingDirectory": "d:\\dev\\OneConfig",
+                "args": [],
+                "vmargs": [],
+                "env": {},
+                "preLaunchTask": ""
+            }
+        ]
+    }
+}

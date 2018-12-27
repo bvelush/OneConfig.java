@@ -1,8 +1,5 @@
 target/
 *.swp
-.project
-.settings/
-.vscode/
 .classpath
 .factorypath
 *.log
