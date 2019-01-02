@@ -16,13 +16,13 @@ import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.spec.MGF1ParameterSpec;
 
-import com.oneconfig.utils.common.ResourceLoader;
-
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 import javax.crypto.spec.SecretKeySpec;
+
+import com.oneconfig.utils.common.ResourceLoader;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 

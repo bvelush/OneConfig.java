@@ -4,6 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.oneconfig</groupId>
     <artifactId>oneconfig</artifactId>
+
     <packaging>pom</packaging>
 
     <version>1.0-SNAPSHOT</version>
@@ -11,8 +12,8 @@
     <name>OneConfig</name>
 
     <modules>
-        <module>./oneconfig.core</module>
-        <module>./utils</module>
+        <module>oneconfig.core</module>
+        <module>utils</module>
     </modules>
 
 </project>
