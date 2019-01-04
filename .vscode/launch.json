@@ -6,6 +6,21 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Debug (Attach) - Remote",
+            "projectName": "demo",
+            "request": "attach",
+            "hostName": "127.0.0.1",
+            "port": "8000"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Demo",
+            "request": "launch",
+            "mainClass": "com.oneconfig.demo.Demo",
+            "projectName": "demo"
+        },
+        {
+            "type": "java",
             "name": "Debug (Launch) - Current File",
             "request": "launch",
             "mainClass": "${file}"

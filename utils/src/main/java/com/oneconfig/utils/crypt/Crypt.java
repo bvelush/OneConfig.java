@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Key;
@@ -44,6 +46,17 @@ public class Crypt {
         try {
             KeyStore keyStore = KeyStore.getInstance(KEYSTORE_INSTANCE);
             keyStore.load(ResourceLoader.getResourceAsStream(KEYSTOREFILE, Crypt.class), KEYSTOREPWD.toCharArray());
+            return keyStore;
+        } catch (Exception ex) {
+            throw new CryptException(String.format("Can't load keystore '%s'", keystorePath), ex);
+        }
+    }
+
+    // TODO: get rid of loadKeyStore, and add to ResourceLoader the discoverPath call.
+    public static KeyStore loadKeyStoreSysPath(String keystorePath, String keystorePwd) {
+        try {
+            KeyStore keyStore = KeyStore.getInstance(KEYSTORE_INSTANCE);
+            keyStore.load(new FileInputStream(new File(keystorePath)), KEYSTOREPWD.toCharArray());
             return keyStore;
         } catch (Exception ex) {
             throw new CryptException(String.format("Can't load keystore '%s'", keystorePath), ex);
