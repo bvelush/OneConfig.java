@@ -1,6 +1,5 @@
 package com.oneconfig.core;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,10 +8,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oneconfig.core.stores.EncJsonStore;
 import com.oneconfig.core.stores.IStore;
 import com.oneconfig.core.stores.JsonStore;
+import com.oneconfig.utils.common.Json;
 import com.oneconfig.utils.common.ResourceLoader;
 
 public class OneConfig {
@@ -21,9 +19,8 @@ public class OneConfig {
     public OneConfig() {
         try {
             String rawCfg = ResourceLoader.getResourceAsString("config.json", OneConfig.class);
-
             init(rawCfg);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new OneConfigException("Can't process 'config.json'", ex);
         }
     }
@@ -31,7 +28,7 @@ public class OneConfig {
     public OneConfig(String jsonConfig) {
         try {
             init(jsonConfig);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new OneConfigException("Can't process json string", ex);
         }
     }
@@ -40,27 +37,30 @@ public class OneConfig {
         try {
             String rawCfg = new String(Files.readAllBytes(configFilePath), charset);
             init(rawCfg);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new OneConfigException("Can't process json string", ex);
         }
     }
 
-    private void init(String rawCfg) throws IOException {
+    private void init(String rawCfg) throws Exception {
         stores = new HashMap<String, IStore>();
-        ObjectMapper om = new ObjectMapper();
-        JsonNode root = om.readTree(rawCfg);
+        // ObjectMapper om = new ObjectMapper();
+        JsonNode root = Json.parseJsonString(rawCfg);
         JsonNode initNode = root.get("init");
 
         parseInit(initNode);
         if (stores.get("") == null) { // if init section does not have default store config, initialize it here
             IStore defaultStore = new JsonStore();
-            defaultStore.init("", root);
+            Map<String, String> configObject = new HashMap<String, String>();
+            String contentRoot = Json.getMandatoryNode(root, Const.DEFAULT_STORE_ROOT).toString();
+            configObject.put(Const.JSON_STORE_CONTENTSTR, contentRoot);
+            defaultStore.init("", configObject);
             stores.put("", defaultStore);
 
-            // this should be taken care in parseInit, but now taking a shortcut...
-            IStore secretStore = new EncJsonStore();
-            secretStore.init("safe", "MasterKey.p12");
-            stores.put("safe", secretStore);
+            // // this should be taken care in parseInit, but now taking a shortcut...
+            // IStore secretStore = new EncJsonStore();
+            // secretStore.init("safe", "MasterKey.p12");
+            // stores.put("safe", secretStore);
         }
     }
 
@@ -96,6 +96,26 @@ public class OneConfig {
     }
 
     private void initStore(String name, JsonNode storeInit) {
-        System.out.println("Initializing store " + name);
+        try {
+            String storeType = Json.getMandatoryString(storeInit, "type");
+
+            Class<?> storeClass = Class.forName(storeType);
+            IStore store = (IStore) storeClass.newInstance();
+
+            Map<String, String> configObject = new HashMap<String, String>();
+            Iterator<String> fieldNames = storeInit.fieldNames();
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                configObject.put(fieldName, Json.getMandatoryString(storeInit, fieldName));
+            }
+
+            store.init(name, configObject);
+
+            System.out.println("Initializing store " + name);
+        } catch (Exception ex) {
+            throw new OneConfigException(String.format("Can't initialize the store '%s'", name), ex);
+        }
     }
+
+
 }

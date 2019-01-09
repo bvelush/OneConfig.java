@@ -5,8 +5,8 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Key;
 import java.security.KeyStore;
-import java.security.PrivateKey;
 
 import com.oneconfig.utils.crypt.Crypt;
 
@@ -19,6 +19,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 
+// running example:
+// java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000 -jar demo\target\demo-1.0-SNAPSHOT-pkg.jar -j <json
+// path> -k <path to keystore> -o <output path>
 public class Demo {
     public static final String CERTNAME = "masterkey";
     public static final String CERTPWD = "";
@@ -37,10 +40,10 @@ public class Demo {
                 byte[] data = Files.readAllBytes(path);
 
                 System.out.println(String.format("Opening the key store at '%s'...", keystorePath));
-                KeyStore keystore = Crypt.loadKeyStoreSysPath(keystorePath, "");
+                KeyStore keystore = Crypt.loadKeyStoreFromPath(keystorePath, "");
 
                 System.out.println(String.format("Reading the key '%s'...", CERTNAME));
-                PrivateKey key = Crypt.getPrivateKey(keystore, CERTNAME, CERTPWD);
+                Key key = Crypt.getPublicKey(keystore, CERTNAME, CERTPWD);
 
                 System.out.println("Encrypting the file...");
                 byte[] encryptedData = Crypt.rsaAesEncrypt(data, key);

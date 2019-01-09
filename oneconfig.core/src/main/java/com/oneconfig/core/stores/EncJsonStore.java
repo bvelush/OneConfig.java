@@ -1,66 +1,63 @@
 package com.oneconfig.core.stores;
 
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.Security;
-import java.security.cert.CertificateFactory;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oneconfig.core.OneConfigException;
-import com.oneconfig.utils.common.ResourceLoader;
-
-import org.apache.commons.io.IOUtils;
-import org.bouncycastle.cms.CMSEnvelopedData;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.KeyTransRecipientInformation;
-import org.bouncycastle.cms.RecipientInformation;
-import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
-import org.bouncycastle.cms.jcajce.JceKeyTransRecipient;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class EncJsonStore extends JsonStore implements IStore {
 
+    // private class StoreConfig {
+    // public String certStorePath;
+    // public String certStorePwd = "";
+    // public String certName = "masterkey";
+    // public String certPwd = "";
+    // public String storePath;
+    // public String storeEncoding = "UTF-8";
+
+    // StoreConfig(Object configObject) throws Exception {
+    // // TODO: parse configObject (probably JSON string) to get all params
+    // storePath = "d:\\dev\\aa.bin";
+    // certStorePath = "MasterKey.p12";
+    // }
+    // }
+
     @Override
-    public void init(String name, Object configObject) {
+    public void init(String name, Map<String, String> configObject) {
         System.out.println(String.format("init of EncJsonStore with name '%s'", name));
 
         try {
-            String certStoreName = (String) configObject;
-
-            Security.addProvider(new BouncyCastleProvider());
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509", "BC");
-
-            char[] keystorePassword = "".toCharArray();
-            char[] keyPassword = "".toCharArray();
-
-            KeyStore keystore = KeyStore.getInstance("PKCS12");
-            keystore.load(ResourceLoader.getResourceAsStream(certStoreName, EncJsonStore.class), keystorePassword);
-            PrivateKey key = (PrivateKey) keystore.getKey("masterkey", keyPassword);
-
-            ObjectMapper om = new ObjectMapper();
-            byte[] encryptedPackage = IOUtils.toByteArray(ResourceLoader.getResourceAsStream("SecurePackage.bin", EncJsonStore.class));
-            String decryptedPackage = decryptData(encryptedPackage, key);
-            JsonNode root = om.readTree(decryptedPackage);
-            super.init(name, root);
+            // StoreConfig storeConfig = new StoreConfig(configObject);
+            // System.out.println("=====================1");
+            // ObjectMapper om = new ObjectMapper();
+            // System.out.println("=====================2");
+            // JsonNode root = om.readTree(decryptStore(storeConfig));
+            Map<String, String> subconfigObject = new HashMap<String, String>();
+            // TODO: read root from env pointer //configObject.put(Const.JSON_STORE_CONTENTSTR, root);
+            super.init(name, subconfigObject);
         } catch (Exception ex) {
             throw new OneConfigException("Can't initialize RSA provider");
         }
     }
 
-    private static String decryptData(byte[] encryptedData, PrivateKey decryptionKey) throws CMSException {
-        try {
-            CMSEnvelopedData envelopedData = new CMSEnvelopedData(encryptedData);
+    // private String decryptStore(StoreConfig storeConfig) throws Exception {
+    // KeyStore keystore = KeyStore.getInstance("PKCS12");
+    // System.out.println("=====================3");
 
-            Collection<RecipientInformation> recipients = envelopedData.getRecipientInfos().getRecipients();
-            KeyTransRecipientInformation recipientInfo = (KeyTransRecipientInformation) recipients.iterator().next();
-            JceKeyTransRecipient recipient = new JceKeyTransEnvelopedRecipient(decryptionKey);
+    // try {
+    // keystore.load(ResourceLoader.getResourceAsStream(storeConfig.certStorePath, EncJsonStore.class),
+    // storeConfig.certStorePwd.toCharArray());
+    // } catch (Exception ex) {
+    // System.out.println(ex.getMessage());
+    // }
 
-            return new String(recipientInfo.getContent(recipient));
-        } catch (Exception ex) {
-            throw new OneConfigException("DecryptionError", ex);
-        }
-    }
+    // System.out.println("=====================4");
 
+    // PrivateKey key = (PrivateKey) keystore.getKey(storeConfig.certName, storeConfig.certPwd.toCharArray());
+    // System.out.println("=====================5");
+    // FileInputStream fis = new FileInputStream(new File(storeConfig.storePath));
+    // byte[] encryptedStore = IOUtils.toByteArray(fis);
+    // String decryptedStore = new String(Crypt.rsaAesDecrypt(encryptedStore, key), storeConfig.storeEncoding);
+    // return decryptedStore;
+    // }
 }

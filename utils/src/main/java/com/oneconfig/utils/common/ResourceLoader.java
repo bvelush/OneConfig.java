@@ -17,6 +17,19 @@ import org.apache.commons.io.IOUtils;
 
 // https://stackoverflow.com/questions/15749192/how-do-i-load-a-file-from-resource-folder
 public class ResourceLoader {
+    public static final String ENV_PREFIX = "env:";
+
+    // /**
+    // * Resolves the path that can be - relative to the Class Path - Absolute - EnvVar (format env:ENV_VAR) to a path to an
+    // * existing resource, or returns null
+    // *
+    // * @param path Path to resolve
+    // * @return Resolved path.
+    // */
+    // public String resolvePath(String path) {
+
+    // }
+
     /**
      * Load all resources with a given name, potentially aggregating all results from the searched classloaders. If no
      * results are found, the resource name is prepended by '/' and tried again.
@@ -99,13 +112,17 @@ public class ResourceLoader {
      * @param callingClass The Class object of the calling object
      */
     public static InputStream getResourceAsStream(String resourceName, Class callingClass) {
+        if (resourceName.startsWith(ENV_PREFIX)) {
+            String envVar = resourceName.substring(ENV_PREFIX.length(), resourceName.length());
+            resourceName = System.getenv(envVar);
+        }
         try {
             return new FileInputStream(new File(resourceName)); // first, try to get the resource as it is
         } catch (FileNotFoundException ex) {
             URL url = getResource(resourceName, callingClass); // if resourceName is not pointing to resource literally (for example, the relative
                                                                // path is used), try discover it
             if (url == null) {
-                throw new RuntimeException(String.format("Error loading resource '%s'", resourceName), ex);
+                throw new RuntimeException(String.format("Error finding resource '%s'", resourceName), ex);
             }
             try {
                 return url.openStream();
@@ -113,6 +130,10 @@ public class ResourceLoader {
                 throw new RuntimeException(String.format("Error loading resource '%s'", resourceName), ex2);
             }
         }
+    }
+
+    public static InputStream getResourceAsStream(String resourceName) {
+        return getResourceAsStream(resourceName, ResourceLoader.class);
     }
 
     /**
@@ -129,6 +150,11 @@ public class ResourceLoader {
         } catch (IOException ex) {
             throw new RuntimeException(String.format("Error loading resource '%s'", resourceName), ex);
         }
+    }
+
+
+    public static String getResourceAsString(String resourceName) {
+        return getResourceAsString(resourceName, ResourceLoader.class);
     }
 
     /**

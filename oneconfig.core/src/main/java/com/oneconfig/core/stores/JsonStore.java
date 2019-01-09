@@ -1,17 +1,20 @@
 package com.oneconfig.core.stores;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.oneconfig.core.Const;
 import com.oneconfig.core.OneConfigException;
+import com.oneconfig.utils.common.Json;
 
 public class JsonStore implements IStore {
     private String name;
     private JsonNode root;
 
-    public void init(String name, Object configObject) {
+    public void init(String name, Map<String, String> configObject) {
         this.name = name;
         try {
-            root = (JsonNode) configObject; // this is a shortcut, needs to be redesigned
+            root = Json.parseJsonString(configObject.get(Const.JSON_STORE_CONTENTSTR));
         } catch (Exception ex) {
             throw new OneConfigException(String.format("Problem initializing store '%s': ", name, ex));
         }

@@ -15,8 +15,17 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathValidator;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
+import java.security.cert.X509Certificate;
 import java.security.spec.MGF1ParameterSpec;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -31,32 +40,26 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 public class Crypt {
     public static final String KEYSTORE_INSTANCE = "PKCS12";
     public static final String SIGN_ALG = "SHA256WithRSA";
-    public static final String KEYSTOREFILE = "MasterKey.p12";
-    public static final String KEYSTOREPWD = ""; // no password. It doesn't make sense. We protect the keystore file physically, not with password
-    public static final String CERTNAME = "masterkey";
-    public static final String CERTPWD = ""; // no password. We protect cert by physically protecting the key file
-
     public static final int AESKEYLENGTH = 256;
 
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    public static KeyStore loadKeyStore(String keystorePath, String keystorePwd) {
+    public static KeyStore loadKeyStoreFromResource(String keystorePath, String keystorePwd) {
         try {
             KeyStore keyStore = KeyStore.getInstance(KEYSTORE_INSTANCE);
-            keyStore.load(ResourceLoader.getResourceAsStream(KEYSTOREFILE, Crypt.class), KEYSTOREPWD.toCharArray());
+            keyStore.load(ResourceLoader.getResourceAsStream(keystorePath, Crypt.class), keystorePwd.toCharArray());
             return keyStore;
         } catch (Exception ex) {
             throw new CryptException(String.format("Can't load keystore '%s'", keystorePath), ex);
         }
     }
 
-    // TODO: get rid of loadKeyStore, and add to ResourceLoader the discoverPath call.
-    public static KeyStore loadKeyStoreSysPath(String keystorePath, String keystorePwd) {
+    public static KeyStore loadKeyStoreFromPath(String keystorePath, String keystorePwd) {
         try {
             KeyStore keyStore = KeyStore.getInstance(KEYSTORE_INSTANCE);
-            keyStore.load(new FileInputStream(new File(keystorePath)), KEYSTOREPWD.toCharArray());
+            keyStore.load(new FileInputStream(new File(keystorePath)), keystorePwd.toCharArray());
             return keyStore;
         } catch (Exception ex) {
             throw new CryptException(String.format("Can't load keystore '%s'", keystorePath), ex);
@@ -64,10 +67,9 @@ public class Crypt {
     }
 
     public static PrivateKey getPrivateKey(KeyStore store, String certName, String certPwd) {
-        PrivateKey result = null;
         try {
-            Key key = store.getKey(certName, certPwd.toCharArray());
             Certificate cert = store.getCertificate(certName);
+            Key key = store.getKey(certName, certPwd.toCharArray());
             PublicKey pubKey = cert.getPublicKey();
             KeyPair keyPair = new KeyPair(pubKey, (PrivateKey) key); // if the certificate does not have private key, the cast exception will occur
             return keyPair.getPrivate();
@@ -226,4 +228,55 @@ public class Crypt {
         output.flush();
         return output.toByteArray();
     }
+
+    // Note: currently, the cert chain validation is not used. Reason is that we don't have a convention of the
+    // a) what PKI we are going to use for OneConfig to work
+    // b) where the root cert public key is going to be located. In Windows, there is a standard place, so no need to worry
+    // about such things. Does any convention exist in Linux or our internal environment?
+    private void validateChain(X509Certificate signCert, X509Certificate rootCert) throws Exception {
+        List<X509Certificate> signCerts = new ArrayList<X509Certificate>() {
+            {
+                add(signCert);
+            }
+        };
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        CertPath certPath = cf.generateCertPath(signCerts);
+        CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
+        TrustAnchor anchor = new TrustAnchor(rootCert, null);
+        PKIXParameters params = new PKIXParameters(Collections.singleton(anchor));
+        params.setRevocationEnabled(false);
+        cpv.validate(certPath, params); // ignore the result
+    }
+
+    // public String verifySignature(byte[] signedData1) {
+    // try {
+    // CMSSignedData signedData = new CMSSignedData(signedData1);
+    // SignerInformationStore lSignerInfo = signedData.getSignerInfos();
+    // Collection<SignerInformation> lSigners = lSignerInfo.getSigners();
+    // SignerInformationVerifier verifier = createTokenVerifier(signCert); // note: looks like verifier instance could be
+    // pre-created during
+    // // SignatureVerifier initialization, but it actually has to be created
+    // // for every signature verification because it is not thread safe
+    // for (Object lObj : lSigners) {
+    // if (lObj instanceof SignerInformation) {
+    // SignerInformation lSigner = (SignerInformation) lObj;
+    // boolean lIsValid = lSigner.verify(verifier);
+    // if (lIsValid) {
+    // byte[] content = (byte[]) signedData.getSignedContent().getContent();
+    // return new String(content, StandardCharsets.UTF_8); // since there is no way we could know what has been signed,
+    // making an
+    // // assumption that it's the UTF-8 string. This is OK because later we
+    // // check this string for validness
+    // }
+    // }
+    // }
+    // String msg = "Wrong signature";
+    // logger.log(Constants.LOG_ERROR, msg);
+    // throw new SignatureVerifierException(msg);
+    // } catch (Exception ex) {
+    // String msg = "Wrong signature";
+    // logger.log(Constants.LOG_ERROR, msg, ex);
+    // throw new SignatureVerifierException(msg, ex);
+    // }
+    // }
 }
