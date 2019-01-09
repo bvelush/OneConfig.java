@@ -1,63 +1,48 @@
 package com.oneconfig.core.stores;
 
+import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.oneconfig.core.OneConfigException;
+import com.oneconfig.utils.common.ResourceLoader;
+import com.oneconfig.utils.crypt.Crypt;
 
+import org.apache.commons.io.IOUtils;
+
+/**
+ * EncJsonStore init expects the following keys in the configObject map:
+ *
+ * -- keystorePath -- path to the certificate store that has the decription private key
+ *
+ * -- cryptcert -- name of the decription cert in the store
+ *
+ * -- storePath -- path to the encrypted file containing secrets
+ */
 public class EncJsonStore extends JsonStore implements IStore {
-
-    // private class StoreConfig {
-    // public String certStorePath;
-    // public String certStorePwd = "";
-    // public String certName = "masterkey";
-    // public String certPwd = "";
-    // public String storePath;
-    // public String storeEncoding = "UTF-8";
-
-    // StoreConfig(Object configObject) throws Exception {
-    // // TODO: parse configObject (probably JSON string) to get all params
-    // storePath = "d:\\dev\\aa.bin";
-    // certStorePath = "MasterKey.p12";
-    // }
-    // }
+    public static final String PWD = "";
+    public static final String KEYSTOREPATH = "keystorePath";
+    public static final String CRYPTCERT = "cryptcert";
+    public static final String STOREPATH = "storePath";
 
     @Override
     public void init(String name, Map<String, String> configObject) {
-        System.out.println(String.format("init of EncJsonStore with name '%s'", name));
-
         try {
-            // StoreConfig storeConfig = new StoreConfig(configObject);
-            // System.out.println("=====================1");
-            // ObjectMapper om = new ObjectMapper();
-            // System.out.println("=====================2");
-            // JsonNode root = om.readTree(decryptStore(storeConfig));
             Map<String, String> subconfigObject = new HashMap<String, String>();
-            // TODO: read root from env pointer //configObject.put(Const.JSON_STORE_CONTENTSTR, root);
+            String decryptedStore = decryptStore(configObject);
+            subconfigObject.put(JsonStore.JSON_STORE_CONTENTSTR, decryptedStore);
             super.init(name, subconfigObject);
         } catch (Exception ex) {
-            throw new OneConfigException("Can't initialize RSA provider");
+            throw new OneConfigException(String.format("Can't initialize store '%s'", name), ex);
         }
     }
 
-    // private String decryptStore(StoreConfig storeConfig) throws Exception {
-    // KeyStore keystore = KeyStore.getInstance("PKCS12");
-    // System.out.println("=====================3");
-
-    // try {
-    // keystore.load(ResourceLoader.getResourceAsStream(storeConfig.certStorePath, EncJsonStore.class),
-    // storeConfig.certStorePwd.toCharArray());
-    // } catch (Exception ex) {
-    // System.out.println(ex.getMessage());
-    // }
-
-    // System.out.println("=====================4");
-
-    // PrivateKey key = (PrivateKey) keystore.getKey(storeConfig.certName, storeConfig.certPwd.toCharArray());
-    // System.out.println("=====================5");
-    // FileInputStream fis = new FileInputStream(new File(storeConfig.storePath));
-    // byte[] encryptedStore = IOUtils.toByteArray(fis);
-    // String decryptedStore = new String(Crypt.rsaAesDecrypt(encryptedStore, key), storeConfig.storeEncoding);
-    // return decryptedStore;
-    // }
+    private String decryptStore(Map<String, String> configObject) throws Exception {
+        KeyStore keystore = Crypt.loadKeyStore(configObject.get(KEYSTOREPATH), PWD);
+        PrivateKey key = Crypt.getPrivateKey(keystore, configObject.get(CRYPTCERT), PWD);
+        byte[] encryptedStore = IOUtils.toByteArray(ResourceLoader.getResourceAsStream(configObject.get(STOREPATH)));
+        String decryptedStore = new String(Crypt.rsaAesDecrypt(encryptedStore, key), "UTF-8");
+        return decryptedStore;
+    }
 }

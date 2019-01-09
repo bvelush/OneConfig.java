@@ -7,14 +7,21 @@ import com.oneconfig.core.Const;
 import com.oneconfig.core.OneConfigException;
 import com.oneconfig.utils.common.Json;
 
+/**
+ * JsonStore expects the following key in the configObject:
+ *
+ * -- storeContent -- a string containing the contents of the store json file
+ */
 public class JsonStore implements IStore {
+    public static final String JSON_STORE_CONTENTSTR = "storeContent";
+
     private String name;
     private JsonNode root;
 
     public void init(String name, Map<String, String> configObject) {
         this.name = name;
         try {
-            root = Json.parseJsonString(configObject.get(Const.JSON_STORE_CONTENTSTR));
+            root = Json.parseJsonString(configObject.get(JSON_STORE_CONTENTSTR));
         } catch (Exception ex) {
             throw new OneConfigException(String.format("Problem initializing store '%s': ", name, ex));
         }

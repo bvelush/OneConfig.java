@@ -10,6 +10,9 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 
 public class ResourceLoaderTest {
+
+    // https://stefanbirkner.github.io/system-rules/
+    // https://stackoverflow.com/questions/8168884/how-to-test-code-dependent-on-environment-variables-using-junit
     @Rule
     public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 

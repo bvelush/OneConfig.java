@@ -21,8 +21,8 @@ public class CryptTest {
     private static final String DEPLOYMENTKEYSTORE = "DeploymentKeyStore.p12"; // the name of the store that is used at the deployment -- the one that
     // has the private key of the encryption certificate
 
-    private static final String OWNERKEYSTORE = "OwnerKeyStore.p12"; // the name of the store that is used to encrypt secrets -- the one that
-                                                                     // has the public key of encryption certificate
+    private static final String OWNERKEYSTORE = "SecOwnerKeyStore.p12"; // the name of the store that is used to encrypt secrets -- the one that
+                                                                        // has the public key of encryption certificate
 
     private static final String DEPLOYMENTCERTNAME = "deployment_enc"; // encryption certificate
 
@@ -37,12 +37,12 @@ public class CryptTest {
 
         // encrypting content
         byte[] contentBits = content.getBytes();
-        KeyStore priKs = Crypt.loadKeyStoreFromResource(DEPLOYMENTKEYSTORE, KEYSTOREPWD);
+        KeyStore priKs = Crypt.loadKeyStore(DEPLOYMENTKEYSTORE, KEYSTOREPWD);
         Key privKey = Crypt.getPrivateKey(priKs, DEPLOYMENTCERTNAME, CERTPWD);
         byte[] cipherBits = Crypt.rsaSimpleEncrypt(contentBits, privKey);
 
         // decrypting content
-        KeyStore pubKs = Crypt.loadKeyStoreFromResource(OWNERKEYSTORE, KEYSTOREPWD);
+        KeyStore pubKs = Crypt.loadKeyStore(OWNERKEYSTORE, KEYSTOREPWD);
         Key pubKey = Crypt.getPublicKey(pubKs, DEPLOYMENTCERTNAME, CERTPWD);
         byte[] plainBits = Crypt.rsaSimpleDecrypt(cipherBits, pubKey);
 
@@ -55,13 +55,13 @@ public class CryptTest {
 
         // encrypting content
         byte[] contentBits = content.getBytes();
-        KeyStore pubKs = Crypt.loadKeyStoreFromResource(OWNERKEYSTORE, KEYSTOREPWD);
+        KeyStore pubKs = Crypt.loadKeyStore(OWNERKEYSTORE, KEYSTOREPWD);
         Key pubKey = Crypt.getPublicKey(pubKs, DEPLOYMENTCERTNAME, CERTPWD);
 
         byte[] cipherBits = Crypt.rsaSimpleEncrypt(contentBits, pubKey);
 
         // decrypting content
-        KeyStore priKs = Crypt.loadKeyStoreFromResource(DEPLOYMENTKEYSTORE, KEYSTOREPWD);
+        KeyStore priKs = Crypt.loadKeyStore(DEPLOYMENTKEYSTORE, KEYSTOREPWD);
         Key privKey = Crypt.getPrivateKey(priKs, DEPLOYMENTCERTNAME, CERTPWD);
         byte[] plainBits = Crypt.rsaSimpleDecrypt(cipherBits, privKey);
 
@@ -70,10 +70,10 @@ public class CryptTest {
 
     @Test
     public void testKeyWrapUnwrap() throws Exception {
-        KeyStore priKs = Crypt.loadKeyStoreFromResource(DEPLOYMENTKEYSTORE, KEYSTOREPWD);
+        KeyStore priKs = Crypt.loadKeyStore(DEPLOYMENTKEYSTORE, KEYSTOREPWD);
         Key privKey = Crypt.getPrivateKey(priKs, DEPLOYMENTCERTNAME, CERTPWD);
 
-        KeyStore pubKs = Crypt.loadKeyStoreFromResource(OWNERKEYSTORE, KEYSTOREPWD);
+        KeyStore pubKs = Crypt.loadKeyStore(OWNERKEYSTORE, KEYSTOREPWD);
         Key pubKey = Crypt.getPublicKey(pubKs, DEPLOYMENTCERTNAME, CERTPWD);
 
         byte[] aeskey = Crypt.getAESRandomKey();
@@ -88,7 +88,7 @@ public class CryptTest {
 
 
         // Key privKey = Crypt.getPrivateKey(priKs, MASTERCERTNAME, MASTERCERTPWD);
-        KeyStore pubKs = Crypt.loadKeyStoreFromResource(OWNERKEYSTORE, KEYSTOREPWD);
+        KeyStore pubKs = Crypt.loadKeyStore(OWNERKEYSTORE, KEYSTOREPWD);
         Key pubKey = Crypt.getPublicKey(pubKs, DEPLOYMENTCERTNAME, CERTPWD);
 
         byte[] content = new byte[testDataSize];
@@ -100,7 +100,7 @@ public class CryptTest {
         // FileUtils.writeByteArrayToFile(new File("d:\\aa.enc"), Crypt.rsaAesEncrypt(content, privKey));
 
 
-        KeyStore priKs = Crypt.loadKeyStoreFromResource(DEPLOYMENTKEYSTORE, KEYSTOREPWD);
+        KeyStore priKs = Crypt.loadKeyStore(DEPLOYMENTKEYSTORE, KEYSTOREPWD);
         Key privKey = Crypt.getPrivateKey(priKs, DEPLOYMENTCERTNAME, CERTPWD);
 
         byte[] decryptedContent = Crypt.rsaAesDecrypt(encryptedContent, privKey);

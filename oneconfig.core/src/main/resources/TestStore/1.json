@@ -3,9 +3,9 @@
         "stores": {
             "vault": {
                 "type": "com.oneconfig.core.stores.EncJsonStore",
+                "storePath": "env:ONECFG_STOREPATH",
                 "keystorePath": "env:ONECFG_DEPLKEYPATH",
-                "cryptcert": "env:ONECFG_CRYPTCERT",
-                "storePath": "env:ONECFG_STOREPATH"
+                "cryptcert": "deployment_enc"
             }
         },
         "cache": {

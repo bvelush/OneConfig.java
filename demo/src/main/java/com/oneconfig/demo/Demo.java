@@ -23,7 +23,7 @@ import org.apache.commons.io.IOUtils;
 // java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000 -jar demo\target\demo-1.0-SNAPSHOT-pkg.jar -j <json
 // path> -k <path to keystore> -o <output path>
 public class Demo {
-    public static final String CERTNAME = "masterkey";
+    public static final String CERTNAME = "deployment_enc";
     public static final String CERTPWD = "";
 
     public static void main(String[] args) {
@@ -40,7 +40,7 @@ public class Demo {
                 byte[] data = Files.readAllBytes(path);
 
                 System.out.println(String.format("Opening the key store at '%s'...", keystorePath));
-                KeyStore keystore = Crypt.loadKeyStoreFromPath(keystorePath, "");
+                KeyStore keystore = Crypt.loadKeyStore(keystorePath, "");
 
                 System.out.println(String.format("Reading the key '%s'...", CERTNAME));
                 Key key = Crypt.getPublicKey(keystore, CERTNAME, CERTPWD);

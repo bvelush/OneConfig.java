@@ -4,8 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Key;
@@ -46,20 +44,10 @@ public class Crypt {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    public static KeyStore loadKeyStoreFromResource(String keystorePath, String keystorePwd) {
+    public static KeyStore loadKeyStore(String keystorePath, String keystorePwd) {
         try {
             KeyStore keyStore = KeyStore.getInstance(KEYSTORE_INSTANCE);
             keyStore.load(ResourceLoader.getResourceAsStream(keystorePath, Crypt.class), keystorePwd.toCharArray());
-            return keyStore;
-        } catch (Exception ex) {
-            throw new CryptException(String.format("Can't load keystore '%s'", keystorePath), ex);
-        }
-    }
-
-    public static KeyStore loadKeyStoreFromPath(String keystorePath, String keystorePwd) {
-        try {
-            KeyStore keyStore = KeyStore.getInstance(KEYSTORE_INSTANCE);
-            keyStore.load(new FileInputStream(new File(keystorePath)), keystorePwd.toCharArray());
             return keyStore;
         } catch (Exception ex) {
             throw new CryptException(String.format("Can't load keystore '%s'", keystorePath), ex);

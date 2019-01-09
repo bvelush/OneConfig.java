@@ -53,7 +53,7 @@ public class OneConfig {
             IStore defaultStore = new JsonStore();
             Map<String, String> configObject = new HashMap<String, String>();
             String contentRoot = Json.getMandatoryNode(root, Const.DEFAULT_STORE_ROOT).toString();
-            configObject.put(Const.JSON_STORE_CONTENTSTR, contentRoot);
+            configObject.put(JsonStore.JSON_STORE_CONTENTSTR, contentRoot);
             defaultStore.init("", configObject);
             stores.put("", defaultStore);
 
@@ -111,7 +111,6 @@ public class OneConfig {
 
             store.init(name, configObject);
 
-            System.out.println("Initializing store " + name);
         } catch (Exception ex) {
             throw new OneConfigException(String.format("Can't initialize the store '%s'", name), ex);
         }
