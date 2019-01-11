@@ -5,20 +5,33 @@
                 "type": "com.oneconfig.core.stores.EncJsonStore",
                 "storePath": "env:ONECFG_STOREPATH",
                 "keystorePath": "env:ONECFG_DEPLKEYPATH",
-                "cryptcert": "deployment_enc"
+                "cryptcert": "deployment_enc",
+                "cacheTTL": "10"
+            },
+            "": {
+                "cacheTTL": "-1"
             }
         },
-        "cache": {
-            "vault": {
-                "TTL": 10
-            }
+        "sensors": {
+            "DEPLOY": {
+                "method": "env",
+                "envvar": "ONECFG_DEPLOYMENT"
+            },
+            "TESTSENSOR1": {}
         }
     },
     "root": {
         "key1": "abc",
+        "deplSensor": {
+            "?": "DEPLOY",
+            "DEV": "--DEV--",
+            "TEST": "--TEST--",
+            "PROD": "--PROD--",
+            "DEFAULT": "--DEV--"
+        },
         "db": {
             "server": "172.11.12.13",
-            "pwd": "{$safe.our-service-key}"
+            "pwd": "$safe.our-service-key"
         }
     }
 }

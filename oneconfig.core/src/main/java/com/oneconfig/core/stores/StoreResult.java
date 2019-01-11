@@ -20,6 +20,9 @@ public class StoreResult {
 
     public StoreResult(Map<String, String> value) {
         isSensor = true;
+        if (value.get("?") == null) {
+            throw new IllegalStateException("Can't create a Sensor from the map because it misses mandatory entry with the key '?'");
+        }
         sensorValue = value;
     }
 
@@ -30,10 +33,17 @@ public class StoreResult {
         return strValue;
     }
 
-    public Map<String, String> getSensorValue() {
+    public Map<String, String> getSensorCollection() {
         if (!isSensor()) {
             throw new IllegalStateException("StoreResult is not Sensor, but Sensor value is requested");
         }
         return sensorValue;
+    }
+
+    public String getSensorName() {
+        if (!isSensor()) {
+            throw new IllegalStateException("StoreResult is not Sensor. getSensorName could be called only for Sensor results");
+        }
+        return sensorValue.get("?");
     }
 }

@@ -6,5 +6,6 @@ public class Const {
     public static final int MAX_KEY_PART_LENGHT = 32; // max lenght of any part of the key (separated by dots)
 
     public static final String DEFAULT_STORE_ROOT = "root";
+    public static final String DEFAULT_SENSOR_VALUE = "DEFAULT";
 
 }

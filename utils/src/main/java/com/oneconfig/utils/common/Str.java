@@ -8,7 +8,7 @@ public class Str {
     // path example: key1.key2.key3 or key
     // sensor example: ?sensor
 
-    private static final String STR_CONFIGKEY = "(?<fullKey>(\\$(?<store>\\w+)\\.)?(?<path>\\w+(\\.\\w+)*)+(\\?(?<sensor>\\w+))?)";
+    private static final String STR_CONFIGKEY = "(?<fullKey>(\\$(?<store>\\w+)\\.)?(?<path>\\w+(\\.\\w+)*)+)";
     private static final String STR_INLINE_CONFIGKEY = "(\\{\\{\\{){1}" + STR_CONFIGKEY + "(\\}\\}\\}){1}";
 
     public static final Pattern RX_CONFIGKEY = Pattern.compile(STR_CONFIGKEY);

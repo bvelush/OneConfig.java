@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.oneconfig.core.sensors.ISensor;
 import com.oneconfig.core.stores.IStore;
 import com.oneconfig.core.stores.JsonStore;
 import com.oneconfig.core.stores.StoreResult;
@@ -17,7 +18,9 @@ import com.oneconfig.utils.common.Str;
 
 public class OneConfig {
     private Map<String, IStore> stores;
+    private Map<String, ISensor> sensors;
 
+    // region exceptionWhenWrongKey
     private boolean exceptionWhenWrongKey = true;
 
     public boolean getExceptionWhenKeyNotFound() {
@@ -27,6 +30,19 @@ public class OneConfig {
     public void setExceptionWhenKeyNotFound(boolean value) {
         exceptionWhenWrongKey = value;
     }
+    // endregion exceptionWhenWrongKey
+
+    // region allowDefaultSensorValue
+    private boolean allowDefaultSensorValue;
+
+    public boolean getAllowDefaultSensorValue() {
+        return allowDefaultSensorValue;
+    }
+
+    public void setAllowDefaultSensorValue(boolean value) {
+        allowDefaultSensorValue = value;
+    }
+    // endregion allowDefaultSensorValue
 
     public OneConfig() {
         try {
@@ -80,6 +96,14 @@ public class OneConfig {
         }
     }
 
+    private String exOrDefault(OneConfigException ex) {
+        if (exceptionWhenWrongKey) {
+            throw ex;
+        } else {
+            return "";
+        }
+    }
+
     public String get(String key) {
         if (key.length() > Const.MAX_KEY_LENGTH) {
             exOrDefault("The key '%s...' is too long. Max length allowed is '%d'", key.subSequence(0, 30), Const.MAX_KEY_LENGTH);
@@ -87,9 +111,31 @@ public class OneConfig {
         try {
             return internalGet(key);
         } catch (OneConfigException ex) {
-            throw ex;
+            return exOrDefault(ex);
         } catch (Exception ex) {
-            throw new OneConfigException("Can't get the value for the key '%s'. See the inner exception for details", ex);
+            return exOrDefault("Can't get the value for the key '%s'. See the inner exception for details", ex);
+        }
+    }
+
+    private String resolveStoreResult(StoreResult result) {
+        if (result.isSensor()) {
+            String sensorName = result.getSensorName();
+            ISensor sensor = sensors.get(sensorName);
+            if (sensor == null) { // sensor with the name sensorName is not registered
+                throw new OneConfigException("Sensor '%s' is not found", sensorName);
+            }
+            String sensorValue = sensor.evaluate();
+            String matchingValue = result.getSensorCollection().get(sensorValue);
+            if (matchingValue == null) { // can't match the return of the sensor with the StoreResult collection of sensor values
+                if (allowDefaultSensorValue) { // if can't match the sensor return, try the default value
+                    matchingValue = Const.DEFAULT_SENSOR_VALUE;
+                } else {
+                    throw new OneConfigException("Can't match the value '%s' for the sensor '%s'", sensorValue, sensorName);
+                }
+            }
+            return matchingValue;
+        } else {
+            return result.getStrValue();
         }
     }
 
@@ -114,9 +160,10 @@ public class OneConfig {
         }
 
         StoreResult storeResult = store.resolvePath(Str.tail(key));
+        String unexpandedReturn = resolveStoreResult(storeResult);
 
         // TODO: parse sensors, then recursive RX_INLINE matching
-        return storeResult.getStrValue();
+        return unexpandedReturn; // storeResult.getStrValue();
     }
 
     private void parseInit(JsonNode initNode) {
