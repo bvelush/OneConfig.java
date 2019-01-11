@@ -17,8 +17,8 @@ import com.oneconfig.utils.common.ResourceLoader;
 import com.oneconfig.utils.common.Str;
 
 public class OneConfig {
-    private Map<String, IStore> stores;
-    private Map<String, ISensor> sensors;
+    private Map<String, IStore> stores = new HashMap<String, IStore>();
+    private Map<String, ISensor> sensors = new HashMap<String, ISensor>();
 
     // region exceptionWhenWrongKey
     private boolean exceptionWhenWrongKey = true;
@@ -70,23 +70,7 @@ public class OneConfig {
         }
     }
 
-    private void init(String rawCfg) throws Exception {
-        stores = new HashMap<String, IStore>();
-        JsonNode root = Json.parseJsonString(rawCfg);
-        JsonNode initNode = root.get("init");
-
-        if (initNode != null) {
-            parseInit(initNode);
-        }
-        if (stores.get("") == null) { // if init section does not have default store config, initialize it here
-            IStore defaultStore = new JsonStore();
-            Map<String, String> configObject = new HashMap<String, String>();
-            String contentRoot = Json.getMandatoryNode(root, Const.DEFAULT_STORE_ROOT).toString();
-            configObject.put(JsonStore.JSON_STORE_CONTENTSTR, contentRoot);
-            defaultStore.init("", configObject);
-            stores.put("", defaultStore);
-        }
-    }
+    // TODO have the getSensor(name) call
 
     private String exOrDefault(String msg, Object... values) {
         if (exceptionWhenWrongKey) {
@@ -106,7 +90,7 @@ public class OneConfig {
 
     public String get(String key) {
         if (key.length() > Const.MAX_KEY_LENGTH) {
-            exOrDefault("The key '%s...' is too long. Max length allowed is '%d'", key.subSequence(0, 30), Const.MAX_KEY_LENGTH);
+            exOrDefault("The key '%s...' is too long. Max length allowed is '%d'", key.substring(0, 30), Const.MAX_KEY_LENGTH);
         }
         try {
             return internalGet(key);
@@ -141,50 +125,100 @@ public class OneConfig {
 
     private String internalGet(String key) {
         String storeName = ""; // by default, using the default store (it's name is "")
+        String path = key; // assuming that storeName is not specified
         if (key.startsWith("$")) { // the store is the first element of the key
-            storeName = Str.head(key).substring(1, Const.MAX_KEY_PART_LENGHT);
+            storeName = Str.head(key).substring(1); // removing leading '$'
+            path = Str.tail(key);
         }
 
-        // Matcher matcher = Str.RX_CONFIGKEY.matcher(key);
-        // if (!matcher.matches()) {
-        // exOrDefault("Key '%s' is in wrong format", key);
-        // }
-
-        // String storeName = matcher.group("store");
-        // if (storeName == null) {
-        // storeName = ""; // if no store name provided in the key, then it is default store
-        // }
         IStore store = stores.get(storeName);
         if (store == null) {
             exOrDefault("Can't find store '%s' from key '%s'", storeName, key);
         }
 
-        StoreResult storeResult = store.resolvePath(Str.tail(key));
+        StoreResult storeResult = store.resolvePath(path);
         String unexpandedReturn = resolveStoreResult(storeResult);
 
         // TODO: parse sensors, then recursive RX_INLINE matching
         return unexpandedReturn; // storeResult.getStrValue();
     }
 
-    private void parseInit(JsonNode initNode) {
-        parseStores(initNode.get("stores"));
-        // ... another init parameters, like cache config goes here
-    }
+    // region ----------- INIT ------------
+    private void init(String rawCfg) throws Exception {
+        JsonNode root = Json.parseJsonString(rawCfg);
+        JsonNode initNode = root.get(Const.DEFAULT_INIT_SECTION);
 
-    private void parseStores(JsonNode stores) {
-        Iterator<String> fields = stores.fieldNames();
-        while (fields.hasNext()) {
-            String name = fields.next();
-            initStore(name, stores.get(name));
+        if (initNode != null) {
+            parseInit(initNode);
+        }
+        if (stores.get("") == null) { // if init section does not have default store config, initialize it here
+            IStore defaultStore = new JsonStore();
+            Map<String, String> configObject = new HashMap<String, String>();
+            String contentRoot = Json.getMandatoryNode(root, Const.DEFAULT_STORE_ROOT).toString();
+            configObject.put(JsonStore.JSON_STORE_CONTENTSTR, contentRoot);
+            defaultStore.init("", configObject);
+            stores.put("", defaultStore);
         }
     }
 
-    private void initStore(String name, JsonNode storeInit) {
-        try {
-            String storeType = Json.getMandatoryString(storeInit, "type");
+    private void parseInit(JsonNode initNode) {
+        JsonNode storesNode = initNode.get(Const.INIT_STORES_SECTION);
+        if (storesNode != null) {
+            Iterator<String> storeNames = storesNode.fieldNames();
+            while (storeNames.hasNext()) {
+                String storeName = storeNames.next();
+                IStore store = initDynamicJsonClass(storeName, storesNode.get(storeName));
+                stores.put(storeName, store);
+            }
+        }
 
-            Class<?> storeClass = Class.forName(storeType);
-            IStore store = (IStore) storeClass.newInstance();
+        JsonNode sensorsNode = initNode.get(Const.INIT_SENSORS_SECTION);
+        if (sensorsNode != null) {
+            Iterator<String> sensorNames = sensorsNode.fieldNames();
+            while (sensorNames.hasNext()) {
+                String sensorName = sensorNames.next();
+                ISensor sensor = initDynamicJsonClass(sensorName, sensorsNode.get(sensorName));
+                sensors.put(sensorName, sensor);
+            }
+        }
+        // ... another init parameters, like cache config goes here
+    }
+
+    private void initDynamicJsonClassCollection(JsonNode jsonCollection) {
+        Iterator<String> classNames = jsonCollection.fieldNames();
+        while (classNames.hasNext()) {
+            String className = classNames.next();
+            initDynamicJsonClass(className, jsonCollection.get(className));
+        }
+    }
+
+    // private void initStore(String name, JsonNode storeInit) {
+    // try {
+    // String storeType = Json.getMandatoryString(storeInit, "type");
+
+    // Class<?> storeClass = Class.forName(storeType);
+    // IStore store = (IStore) storeClass.newInstance();
+
+    // Map<String, String> configObject = new HashMap<String, String>();
+    // Iterator<String> fieldNames = storeInit.fieldNames();
+    // while (fieldNames.hasNext()) {
+    // String fieldName = fieldNames.next();
+    // configObject.put(fieldName, Json.getMandatoryString(storeInit, fieldName));
+    // }
+
+    // store.init(name, configObject);
+
+    // } catch (Exception ex) {
+    // throw new OneConfigException(String.format("Can't initialize the store '%s'", name), ex);
+    // }
+    // }
+
+    private <T extends IInit> T initDynamicJsonClass(String name, JsonNode storeInit) {
+        try {
+            String dynClassName = Json.getMandatoryString(storeInit, "type");
+
+            Class<?> dynClass = Class.forName(dynClassName);
+            T instance = (T) dynClass.newInstance();
 
             Map<String, String> configObject = new HashMap<String, String>();
             Iterator<String> fieldNames = storeInit.fieldNames();
@@ -193,12 +227,23 @@ public class OneConfig {
                 configObject.put(fieldName, Json.getMandatoryString(storeInit, fieldName));
             }
 
-            store.init(name, configObject);
-
+            instance.init(name, configObject);
+            return instance;
         } catch (Exception ex) {
-            throw new OneConfigException(String.format("Can't initialize the store '%s'", name), ex);
+            throw new OneConfigException(String.format("Can't initialize the class '%s'", name), ex);
         }
     }
 
+    // private void initSensors(JsonNode sensors) {
+    // Iterator<String> sensorNames = sensors.fieldNames();
+    // while (sensorNames.hasNext()) {
+    // String name = sensorNames.next();
+    // initSensor(name, sensors.get(name));
+    // }
+    // }
 
+    // private void initSensor(String name, JsonNode sensorInit) {
+
+    // }
+    // endregion ----------- INIT ------------
 }

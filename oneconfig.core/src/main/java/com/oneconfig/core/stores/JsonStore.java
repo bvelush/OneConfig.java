@@ -25,6 +25,7 @@ public class JsonStore implements IStore {
         this.name = name;
         try {
             root = Json.parseJsonString(configObject.get(JSON_STORE_CONTENTSTR));
+            // TODO: add processing for cacheTTL
         } catch (Exception ex) {
             throw new OneConfigException(String.format("Problem initializing store '%s': ", name, ex));
         }

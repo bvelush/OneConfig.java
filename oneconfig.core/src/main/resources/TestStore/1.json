@@ -1,5 +1,5 @@
 {
-    "init": {
+    "INIT": {
         "stores": {
             "vault": {
                 "type": "com.oneconfig.core.stores.EncJsonStore",
@@ -7,27 +7,29 @@
                 "keystorePath": "env:ONECFG_DEPLKEYPATH",
                 "cryptcert": "deployment_enc",
                 "cacheTTL": "10"
-            },
-            "": {
-                "cacheTTL": "-1"
             }
         },
         "sensors": {
             "DEPLOY": {
-                "method": "env",
+                "type": "com.oneconfig.core.sensors.DeploySensor",
                 "envvar": "ONECFG_DEPLOYMENT"
             },
-            "TESTSENSOR1": {}
+            "TESTSENSOR1": {
+                "type": "com.oneconfig.core.sensors.TestSensor",
+                "retval": "BOOM!"
+            }
         }
     },
-    "root": {
+    "CONFIG_ROOT": {
         "key1": "abc",
-        "deplSensor": {
-            "?": "DEPLOY",
-            "DEV": "--DEV--",
-            "TEST": "--TEST--",
-            "PROD": "--PROD--",
-            "DEFAULT": "--DEV--"
+        "myapp": {
+            "deployment": {
+                "?": "DEPLOY",
+                "DEV": "--DEV--",
+                "TEST": "--TEST--",
+                "PROD": "--PROD--",
+                "DEFAULT": "--DEV--"
+            }
         },
         "db": {
             "server": "172.11.12.13",

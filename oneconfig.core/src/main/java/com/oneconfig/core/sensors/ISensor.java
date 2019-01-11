@@ -1,6 +1,8 @@
 package com.oneconfig.core.sensors;
 
-public interface ISensor {
+import com.oneconfig.core.IInit;
+
+public interface ISensor extends IInit {
     String getName();
 
     String evaluate();

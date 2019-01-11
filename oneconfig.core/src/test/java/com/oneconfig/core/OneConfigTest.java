@@ -1,24 +1,21 @@
 package com.oneconfig.core;
 
+import static org.junit.Assert.assertEquals;
+
 import com.oneconfig.utils.common.ResourceLoader;
 
 import org.junit.Test;
 
 public class OneConfigTest {
     @Test
-    public void testOc() {
+    public void testSmokeTest() {
         OneConfig cfg = new OneConfig(ResourceLoader.getResourceAsString("TestStore/1.json", OneConfigTest.class));
-        cfg.get("key1");
-        cfg.get("key1.key2");
-        cfg.get("$store.key1");
-        cfg.get("$store.key1.key2");
-        cfg.get("key1?sensor");
-        cfg.get("key1.key2?sensor");
-        cfg.get("$store.key1?sensor");
-        cfg.get("$store.key1.key2?sensor");
+        String result;
 
-        // cfg.get("web.db.server");
-
+        result = cfg.get("myapp.deployment");
+        assertEquals("--TEST--", result);
+        result = cfg.get("$vault.service1.sec1");
+        assertEquals("--sec1--", result);
     }
 
 
