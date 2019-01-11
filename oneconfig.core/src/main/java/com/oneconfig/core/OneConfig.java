@@ -10,11 +10,23 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.oneconfig.core.stores.IStore;
 import com.oneconfig.core.stores.JsonStore;
+import com.oneconfig.core.stores.StoreResult;
 import com.oneconfig.utils.common.Json;
 import com.oneconfig.utils.common.ResourceLoader;
+import com.oneconfig.utils.common.Str;
 
 public class OneConfig {
     private Map<String, IStore> stores;
+
+    private boolean exceptionWhenWrongKey = true;
+
+    public boolean getExceptionWhenKeyNotFound() {
+        return exceptionWhenWrongKey;
+    }
+
+    public void setExceptionWhenKeyNotFound(boolean value) {
+        exceptionWhenWrongKey = value;
+    }
 
     public OneConfig() {
         try {
@@ -44,11 +56,12 @@ public class OneConfig {
 
     private void init(String rawCfg) throws Exception {
         stores = new HashMap<String, IStore>();
-        // ObjectMapper om = new ObjectMapper();
         JsonNode root = Json.parseJsonString(rawCfg);
         JsonNode initNode = root.get("init");
 
-        parseInit(initNode);
+        if (initNode != null) {
+            parseInit(initNode);
+        }
         if (stores.get("") == null) { // if init section does not have default store config, initialize it here
             IStore defaultStore = new JsonStore();
             Map<String, String> configObject = new HashMap<String, String>();
@@ -56,30 +69,54 @@ public class OneConfig {
             configObject.put(JsonStore.JSON_STORE_CONTENTSTR, contentRoot);
             defaultStore.init("", configObject);
             stores.put("", defaultStore);
+        }
+    }
 
-            // // this should be taken care in parseInit, but now taking a shortcut...
-            // IStore secretStore = new EncJsonStore();
-            // secretStore.init("safe", "MasterKey.p12");
-            // stores.put("safe", secretStore);
+    private String exOrDefault(String msg, Object... values) {
+        if (exceptionWhenWrongKey) {
+            throw new OneConfigException(String.format(msg, values));
+        } else {
+            return "";
         }
     }
 
     public String get(String key) {
-        IStore store = null;
-        String storeName = "";
-        int storePos = -1;
-        if (key.charAt(0) == '$') { // key starts with store ID
-            storePos = key.indexOf('.', 1);
-            if (storePos == -1) {
-                throw new OneConfigException("Store Name is not valid after '$' in the key: " + key);
-            }
-            storeName = key.substring(1, storePos - 1);
+        if (key.length() > Const.MAX_KEY_LENGTH) {
+            exOrDefault("The key '%s...' is too long. Max length allowed is '%d'", key.subSequence(0, 30), Const.MAX_KEY_LENGTH);
         }
-        store = stores.get(storeName);
+        try {
+            return internalGet(key);
+        } catch (OneConfigException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new OneConfigException("Can't get the value for the key '%s'. See the inner exception for details", ex);
+        }
+    }
+
+    private String internalGet(String key) {
+        String storeName = ""; // by default, using the default store (it's name is "")
+        if (key.startsWith("$")) { // the store is the first element of the key
+            storeName = Str.head(key).substring(1, Const.MAX_KEY_PART_LENGHT);
+        }
+
+        // Matcher matcher = Str.RX_CONFIGKEY.matcher(key);
+        // if (!matcher.matches()) {
+        // exOrDefault("Key '%s' is in wrong format", key);
+        // }
+
+        // String storeName = matcher.group("store");
+        // if (storeName == null) {
+        // storeName = ""; // if no store name provided in the key, then it is default store
+        // }
+        IStore store = stores.get(storeName);
         if (store == null) {
-            throw new OneConfigException(String.format("Store with name '%s' is not registered", storeName));
+            exOrDefault("Can't find store '%s' from key '%s'", storeName, key);
         }
-        return store.resolveKey(key.substring(storePos + 1));
+
+        StoreResult storeResult = store.resolvePath(Str.tail(key));
+
+        // TODO: parse sensors, then recursive RX_INLINE matching
+        return storeResult.getStrValue();
     }
 
     private void parseInit(JsonNode initNode) {

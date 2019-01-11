@@ -11,4 +11,12 @@ public class OneConfigException extends RuntimeException {
     public OneConfigException(String message, Throwable throwable) {
         super(message, throwable);
     }
+
+    public OneConfigException(String message, Object... args) {
+        super(String.format(message, args));
+    }
+
+    public OneConfigException(String message, Throwable throwable, Object... args) {
+        super(String.format(message, args), throwable);
+    }
 }

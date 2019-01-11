@@ -15,6 +15,7 @@
         }
     },
     "root": {
+        "key1": "abc",
         "db": {
             "server": "172.11.12.13",
             "pwd": "{$safe.our-service-key}"

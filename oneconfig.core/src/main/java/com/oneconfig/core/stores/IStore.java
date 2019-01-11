@@ -9,5 +9,5 @@ public interface IStore {
 
     String getName();
 
-    String resolveKey(String key);
+    StoreResult resolvePath(String path); // return value probably should be something like Sensor/single val class
 }

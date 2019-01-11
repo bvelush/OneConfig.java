@@ -1,11 +1,14 @@
 package com.oneconfig.core.stores;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.oneconfig.core.Const;
 import com.oneconfig.core.OneConfigException;
 import com.oneconfig.utils.common.Json;
+import com.oneconfig.utils.common.Str;
 
 /**
  * JsonStore expects the following key in the configObject:
@@ -31,28 +34,78 @@ public class JsonStore implements IStore {
         return name;
     }
 
-    public String resolveKey(String key) {
-        return internalResolveKey(key, root, 0, key);
+    public StoreResult resolvePath(String path) {
+        return internalResolveKey(path, root, 0, path);
     }
 
-    private String internalResolveKey(String key, JsonNode root, int nestLevel, String origKey) {
-        if (nestLevel > Const.MAX_LEVELS) {
-            throw new OneConfigException(String.format("Too many nested levels in the key '%s'", origKey));
+    private StoreResult parseNodeForResult(JsonNode node, String nodeName, String fullPath) {
+        if (node.isTextual()) {
+            return new StoreResult(node.textValue());
+        }
+        return sensorNode(node, fullPath);
+    }
+
+    private StoreResult sensorNode(JsonNode node, String fullPath) {
+        Map<String, String> sensorValues = new HashMap<String, String>();
+        Iterator<String> fieldNames = node.fieldNames();
+        while (fieldNames.hasNext()) {
+            String fieldName = fieldNames.next();
+            JsonNode fieldValue = node.get(fieldName);
+            if (!fieldValue.isTextual()) {
+                throw new OneConfigException("Sensor field '%s' at path '%s' is expected to be text", fieldName, fullPath);
+            }
+            sensorValues.put(fieldName, fieldValue.textValue());
+        }
+        if (sensorValues.get("?") == null) {
+            throw new OneConfigException("Sensor at path '%s' must have the field \"?\": \"<SensorName>\"", fullPath);
+        }
+        return new StoreResult(sensorValues);
+    }
+
+    private StoreResult internalResolveKey(String path, JsonNode root, int nestingLevel, String origPath) {
+        if (nestingLevel > Const.MAX_KEY_PARTS) {
+            throw new OneConfigException("Too many nested levels in the path '%s'", origPath);
         }
 
-        int dotPos = key.indexOf('.');
-        String subKey = "";
-        if (dotPos == -1) {
-            subKey = key;
+        String nodeName = Str.head(path);
+        if (nodeName.length() > Const.MAX_KEY_PART_LENGHT) {
+            throw new OneConfigException(
+                "The lenght of the path component '%s' of the key '%s' is more than allowed %d symbols.",
+                nodeName,
+                origPath,
+                Const.MAX_KEY_PART_LENGHT
+            );
+        }
+        String pathTail = Str.tail(path);
+
+        JsonNode currNode = root.get(nodeName);
+        if (currNode == null) {
+            throw new OneConfigException("Key '%s' in the path '%s' can't be found in the config file", nodeName, origPath);
+        }
+
+        if (pathTail.length() > 0) {
+            if (!currNode.isObject()) { // if there are more keys to process but current node does not have internal structure
+                throw new OneConfigException("Part '%s' of the path '%s' cannot be reached", pathTail, origPath);
+            } else { // drill down inside the object
+                return internalResolveKey(pathTail, currNode, nestingLevel + 1, origPath);
+            }
         } else {
-            subKey = key.substring(0, dotPos);
-        }
-        JsonNode subNode = root.get(subKey);
-        if (subNode.isContainerNode()) {
-            return internalResolveKey(key.substring(dotPos + 1), subNode, nestLevel + 1, key);
+            return parseNodeForResult(currNode, nodeName, origPath);
         }
 
-        return subNode.textValue();
+        // int dotPos = path.indexOf('.');
+        // String subKey = "";
+        // if (dotPos == -1) {
+        // subKey = path;
+        // } else {
+        // subKey = path.substring(0, dotPos);
+        // }
+        // JsonNode subNode = root.get(subKey);
+        // if (subNode.isContainerNode()) {
+        // return internalResolveKey(path.substring(dotPos + 1), subNode, nestingLevel + 1, path);
+        // }
+
+        // return new StoreResult(subNode.textValue());
     }
 
 
