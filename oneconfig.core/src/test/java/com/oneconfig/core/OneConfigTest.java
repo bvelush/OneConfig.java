@@ -2,17 +2,14 @@ package com.oneconfig.core;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.regex.Matcher;
-
 import com.oneconfig.utils.common.ResourceLoader;
-import com.oneconfig.utils.common.Str;
 
 import org.junit.Test;
 
 public class OneConfigTest {
     @Test
     public void testSmokeTest() {
-        OneConfig cfg = new OneConfig(ResourceLoader.getResourceAsString("TestStore/1.json", OneConfigTest.class));
+        OneConfig cfg = new OneConfig(ResourceLoader.getResourceAsString("TestStore/1.json"));
         String result;
 
         result = cfg.get("myapp.deployment");
@@ -22,14 +19,19 @@ public class OneConfigTest {
     }
 
     @Test
-    public void testRecursiveKeyResolution() {
-        String input = "==={{{abc1}}}==={{{abc2}}}===";
-        Matcher m = Str.RX_INLINE_CONFIGKEY.matcher(input);
-        if (m.find()) {
-            String result = m.replaceFirst(m.group("fullKey"));
-            System.out.println(result);
-        }
+    public void testRecursiveReplaceSimple() {
+        OneConfig cfg = new OneConfig(ResourceLoader.getResourceAsString("TestStore/1.json"));
+        String result = cfg.get("db.pwd");
+
+        assertEquals("--sec2--", result);
     }
 
+    @Test
+    public void testRecursiveReplaceFull() {
+        OneConfig cfg = new OneConfig(ResourceLoader.getResourceAsString("TestStore/1.json"));
+        String result = cfg.get("db.connectionString");
+
+        assertEquals("server=--sec1--;vip=172.11.12.13;transactionSupport=true;pwd=--sec2--;OneConfig=is_cool;--root_sec1--", result);
+    }
 
 }

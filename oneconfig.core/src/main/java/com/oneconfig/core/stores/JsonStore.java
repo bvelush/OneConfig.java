@@ -36,7 +36,7 @@ public class JsonStore implements IStore {
     }
 
     public StoreResult resolvePath(String path) {
-        return internalResolveKey(path, root, 0, path);
+        return internalResolveKey(path, root, 1, path);
     }
 
     private StoreResult parseNodeForResult(JsonNode node, String nodeName, String fullPath) {
@@ -64,7 +64,7 @@ public class JsonStore implements IStore {
     }
 
     private StoreResult internalResolveKey(String path, JsonNode root, int nestingLevel, String origPath) {
-        if (nestingLevel > Const.MAX_KEY_PARTS) {
+        if (nestingLevel > Const.MAX_KEY_LEVELS) {
             throw new OneConfigException("Too many nested levels in the path '%s'", origPath);
         }
 

@@ -94,7 +94,7 @@ public class OneConfig {
             exOrDefault("The key '%s...' is too long. Max length allowed is '%d'", key.substring(0, 30), Const.MAX_KEY_LENGTH);
         }
         try {
-            return internalGet(key);
+            return internalGet(key, 1, key);
         } catch (OneConfigException ex) {
             return exOrDefault(ex);
         } catch (Exception ex) {
@@ -124,7 +124,10 @@ public class OneConfig {
         }
     }
 
-    private String internalGet(String key) {
+    private String internalGet(String key, int level, String origKey) {
+        if (level > Const.MAX_KEY_LEVELS) {
+            throw new OneConfigException("Too many nested levels while resolving the key '%s'", origKey);
+        }
         String storeName = ""; // by default, using the default store (it's name is "")
         String path = key; // assuming that storeName is not specified
         if (key.startsWith("$")) { // the store is the first element of the key
@@ -140,9 +143,13 @@ public class OneConfig {
         StoreResult storeResult = store.resolvePath(path);
         String unexpandedReturn = resolveStoreResult(storeResult); // return could still contain other keys to be replaced
 
+        String expandedReturn = Str.replacePattern(
+            Str.RX_INLINE_CONFIGKEY,
+            unexpandedReturn,
+            (match) -> internalGet(match.group("fullKey"), level + 1, origKey)
+        );
 
-        // TODO: parse sensors, then recursive RX_INLINE matching
-        return unexpandedReturn;
+        return expandedReturn;
     }
 
     private String replaceKeys(String str) {

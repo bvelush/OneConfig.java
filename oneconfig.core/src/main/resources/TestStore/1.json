@@ -32,8 +32,12 @@
             }
         },
         "db": {
-            "server": "172.11.12.13",
-            "pwd": "$safe.our-service-key"
+            "vip": "172.11.12.13",
+            "pwd": "{{{$vault.service1.sec2}}}",
+            "connectionString": "server={{{$vault.service1.sec1}}};vip={{{db.vip}}};transactionSupport=true;pwd={{{$vault.service1.sec2}}};OneConfig={{{oneConfig.grade}}}"
+        },
+        "oneConfig": {
+            "grade": "is_cool;{{{$vault.root_sec1}}}"
         }
     }
 }

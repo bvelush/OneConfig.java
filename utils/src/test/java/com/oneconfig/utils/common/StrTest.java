@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.junit.Test;
 
@@ -48,11 +49,23 @@ public class StrTest {
     }
 
     @Test
+    public void testReplacePatternWithRecursiveMatch() {
+        // this test is VERY important: it makes sure that the replacePattern can work replacing the match with something that
+        // also matches the pattenr; without falling into endless recursion
+
+        String result = Str.replacePattern(Pattern.compile("(?<number>[0-9]+)"), "some 123 are 845 and some are not", (match) -> {
+            return String.format("!%s!", match.group("number")); // we replace with !number!, which also matches pattern, but endless recursion
+                                                                 // doesn't happen
+        });
+
+        assertEquals("some !123! are !845! and some are not", result);
+    }
+
+    @Test
     public void testRxInlineMatcher() {
-        // String result = Str.replacePattern(Pattern.compile("(?<number>[0-9]+)"), "some 123 are 845 and some are not", (match)
-        // -> {
-        // return String.format("!%s!", match.group("number"));
-        // });
+        String result = Str.replacePattern(Pattern.compile("(?<number>[0-9]+)"), "some 123 are 845 and some are not", (match) -> {
+            return String.format("!%s!", match.group("number"));
+        });
 
         Map<String, String> testCases = new HashMap<String, String>() {
             {
@@ -72,9 +85,14 @@ public class StrTest {
         };
 
         for (String input : testCases.keySet()) {
-            String actualResult = Str.replacePattern(Str.RX_INLINE_CONFIGKEY, input, (match) -> match.group("fullKey"));
-            String expectedResult = testCases.get(input);
-            assertEquals(String.format("'%s' => '%s'", input, expectedResult), expectedResult, actualResult);
+            try {
+                String actualResult = Str.replacePattern(Str.RX_INLINE_CONFIGKEY, input, (match) -> match.group("fullKey"));
+                String expectedResult = testCases.get(input);
+                assertEquals(String.format("'%s' => '%s'", input, expectedResult), expectedResult, actualResult);
+            } catch (Exception ex) {
+                System.out.println(String.format("Input: '%s'", input));
+                throw ex;
+            }
         }
     }
 }

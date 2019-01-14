@@ -48,17 +48,16 @@ public class Str {
      * @return input with all occurences of pattern replaced with the return of transformMatch for each occurence
      */
     public static String replacePattern(Pattern pattern, String input, Function<Matcher, String> transformMatch) {
-        boolean found;
-        String result = input;
-        do {
-            found = false;
-            Matcher m = pattern.matcher(result);
-            if (m.find()) {
-                found = true;
-                String transformedMatch = transformMatch.apply(m);
-                result = m.replaceFirst(Matcher.quoteReplacement(transformedMatch));
-            }
-        } while (found);
-        return result;
+        StringBuffer result = new StringBuffer();
+
+        Matcher m = pattern.matcher(input);
+        while (m.find()) {
+            String transformedMatch = transformMatch.apply(m);
+            m.appendReplacement(result, Matcher.quoteReplacement(transformedMatch)); // .quoteReplacement processes '\' and '$' that have special
+                                                                                     // meaning for any replace methods, including .appendReplacement
+        }
+        m.appendTail(result);
+
+        return result.toString();
     }
 }
