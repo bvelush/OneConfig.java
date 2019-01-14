@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.oneconfig.core.sensors.ISensor;
@@ -76,7 +77,7 @@ public class OneConfig {
         if (exceptionWhenWrongKey) {
             throw new OneConfigException(String.format(msg, values));
         } else {
-            return "";
+            return null;
         }
     }
 
@@ -84,7 +85,7 @@ public class OneConfig {
         if (exceptionWhenWrongKey) {
             throw ex;
         } else {
-            return "";
+            return null;
         }
     }
 
@@ -137,10 +138,19 @@ public class OneConfig {
         }
 
         StoreResult storeResult = store.resolvePath(path);
-        String unexpandedReturn = resolveStoreResult(storeResult);
+        String unexpandedReturn = resolveStoreResult(storeResult); // return could still contain other keys to be replaced
+
 
         // TODO: parse sensors, then recursive RX_INLINE matching
-        return unexpandedReturn; // storeResult.getStrValue();
+        return unexpandedReturn;
+    }
+
+    private String replaceKeys(String str) {
+        Matcher m = Str.RX_INLINE_CONFIGKEY.matcher(str);
+        // while (m.find()) {
+
+        // }
+        return null;
     }
 
     // region ----------- INIT ------------
@@ -162,6 +172,7 @@ public class OneConfig {
     }
 
     private void parseInit(JsonNode initNode) {
+        // stores init
         JsonNode storesNode = initNode.get(Const.INIT_STORES_SECTION);
         if (storesNode != null) {
             Iterator<String> storeNames = storesNode.fieldNames();
@@ -172,6 +183,7 @@ public class OneConfig {
             }
         }
 
+        // sensors init
         JsonNode sensorsNode = initNode.get(Const.INIT_SENSORS_SECTION);
         if (sensorsNode != null) {
             Iterator<String> sensorNames = sensorsNode.fieldNames();
@@ -181,37 +193,9 @@ public class OneConfig {
                 sensors.put(sensorName, sensor);
             }
         }
+
         // ... another init parameters, like cache config goes here
     }
-
-    private void initDynamicJsonClassCollection(JsonNode jsonCollection) {
-        Iterator<String> classNames = jsonCollection.fieldNames();
-        while (classNames.hasNext()) {
-            String className = classNames.next();
-            initDynamicJsonClass(className, jsonCollection.get(className));
-        }
-    }
-
-    // private void initStore(String name, JsonNode storeInit) {
-    // try {
-    // String storeType = Json.getMandatoryString(storeInit, "type");
-
-    // Class<?> storeClass = Class.forName(storeType);
-    // IStore store = (IStore) storeClass.newInstance();
-
-    // Map<String, String> configObject = new HashMap<String, String>();
-    // Iterator<String> fieldNames = storeInit.fieldNames();
-    // while (fieldNames.hasNext()) {
-    // String fieldName = fieldNames.next();
-    // configObject.put(fieldName, Json.getMandatoryString(storeInit, fieldName));
-    // }
-
-    // store.init(name, configObject);
-
-    // } catch (Exception ex) {
-    // throw new OneConfigException(String.format("Can't initialize the store '%s'", name), ex);
-    // }
-    // }
 
     private <T extends IInit> T initDynamicJsonClass(String name, JsonNode storeInit) {
         try {
@@ -233,17 +217,5 @@ public class OneConfig {
             throw new OneConfigException(String.format("Can't initialize the class '%s'", name), ex);
         }
     }
-
-    // private void initSensors(JsonNode sensors) {
-    // Iterator<String> sensorNames = sensors.fieldNames();
-    // while (sensorNames.hasNext()) {
-    // String name = sensorNames.next();
-    // initSensor(name, sensors.get(name));
-    // }
-    // }
-
-    // private void initSensor(String name, JsonNode sensorInit) {
-
-    // }
     // endregion ----------- INIT ------------
 }

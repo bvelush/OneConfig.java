@@ -1,5 +1,7 @@
 package com.oneconfig.utils.common;
 
+import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Str {
@@ -25,5 +27,38 @@ public class Str {
         int dot = str.indexOf('.');
         if (dot < 0) return "";
         return str.substring(dot + 1, str.length());
+    }
+
+    /**
+     * For each occurence of the @pattern in the @input string, 'transformMatch' function will be called, and found pattern
+     * will be replaced with the function return. Function 'transformMatch' takes the parameter Matcher for the respective
+     * pattern, and returns the string that will be used to replace the found pattern. replacePattern works until all
+     * occurences of pattern will be replaced with return of transformMatch.
+     *
+     * Example: Pattern: '(?<number>[0-9]+)' Input: 'some 123 are 845 and some are not'.
+     *
+     * String result = Str.replacePattern("(?<number>[0-9]+)", "some 123 are 845 and some are not", (match) ->
+     * match.group("number"))
+     *
+     * @param pattern        Pattern to be found. Supports groups, named groups and other advanced features of Regular
+     *                       Expressions
+     * @param input          input string
+     * @param transformMatch function with signature 'String transformMatch(Matcher match)' that transforms the found match
+     *                       to the string that will replace the occurence of the pattern
+     * @return input with all occurences of pattern replaced with the return of transformMatch for each occurence
+     */
+    public static String replacePattern(Pattern pattern, String input, Function<Matcher, String> transformMatch) {
+        boolean found;
+        String result = input;
+        do {
+            found = false;
+            Matcher m = pattern.matcher(result);
+            if (m.find()) {
+                found = true;
+                String transformedMatch = transformMatch.apply(m);
+                result = m.replaceFirst(Matcher.quoteReplacement(transformedMatch));
+            }
+        } while (found);
+        return result;
     }
 }

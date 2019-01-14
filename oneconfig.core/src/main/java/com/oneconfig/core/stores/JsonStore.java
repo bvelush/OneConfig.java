@@ -87,27 +87,11 @@ public class JsonStore implements IStore {
         if (pathTail.length() > 0) {
             if (!currNode.isObject()) { // if there are more keys to process but current node does not have internal structure
                 throw new OneConfigException("Part '%s' of the path '%s' cannot be reached", pathTail, origPath);
-            } else { // drill down inside the object
+            } else { // drilling down inside the object
                 return internalResolveKey(pathTail, currNode, nestingLevel + 1, origPath);
             }
         } else {
             return parseNodeForResult(currNode, nodeName, origPath);
         }
-
-        // int dotPos = path.indexOf('.');
-        // String subKey = "";
-        // if (dotPos == -1) {
-        // subKey = path;
-        // } else {
-        // subKey = path.substring(0, dotPos);
-        // }
-        // JsonNode subNode = root.get(subKey);
-        // if (subNode.isContainerNode()) {
-        // return internalResolveKey(path.substring(dotPos + 1), subNode, nestingLevel + 1, path);
-        // }
-
-        // return new StoreResult(subNode.textValue());
     }
-
-
 }

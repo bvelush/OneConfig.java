@@ -3,9 +3,27 @@
         "default": "",
         "items": [
             {
-                "name": "oneconfig",
-                "projectName": "oneconfig",
-                "workingDirectory": "d:\\dev\\OneConfig",
+                "name": "demo",
+                "projectName": "demo",
+                "workingDirectory": "d:\\dev\\oneconfig\\demo",
+                "args": [],
+                "vmargs": [],
+                "env": {},
+                "preLaunchTask": ""
+            },
+            {
+                "name": "oneconfig-core",
+                "projectName": "oneconfig-core",
+                "workingDirectory": "d:\\dev\\oneconfig\\oneconfig.core",
+                "args": [],
+                "vmargs": [],
+                "env": {},
+                "preLaunchTask": ""
+            },
+            {
+                "name": "oneconfig-utils",
+                "projectName": "oneconfig-utils",
+                "workingDirectory": "d:\\dev\\oneconfig\\utils",
                 "args": [],
                 "vmargs": [],
                 "env": {},
@@ -17,9 +35,27 @@
         "default": "",
         "items": [
             {
-                "name": "oneconfig",
-                "projectName": "oneconfig",
-                "workingDirectory": "d:\\dev\\OneConfig",
+                "name": "demo",
+                "projectName": "demo",
+                "workingDirectory": "d:\\dev\\oneconfig\\demo",
+                "args": [],
+                "vmargs": [],
+                "env": {},
+                "preLaunchTask": ""
+            },
+            {
+                "name": "oneconfig-core",
+                "projectName": "oneconfig-core",
+                "workingDirectory": "d:\\dev\\oneconfig\\oneconfig.core",
+                "args": [],
+                "vmargs": [],
+                "env": {},
+                "preLaunchTask": ""
+            },
+            {
+                "name": "oneconfig-utils",
+                "projectName": "oneconfig-utils",
+                "workingDirectory": "d:\\dev\\oneconfig\\utils",
                 "args": [],
                 "vmargs": [],
                 "env": {},
