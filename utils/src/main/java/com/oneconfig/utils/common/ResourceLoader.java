@@ -114,7 +114,15 @@ public class ResourceLoader {
     public static InputStream getResourceAsStream(String resourceName, Class callingClass) {
         if (resourceName.startsWith(ENV_PREFIX)) {
             String envVar = resourceName.substring(ENV_PREFIX.length(), resourceName.length());
-            resourceName = System.getenv(envVar);
+            String tempResName = System.getenv(envVar);
+            if (tempResName == null) {
+                String msg = String.format(
+                    "Error resolving the resource name '%s'. Make sure that environment variable '%s' is defined",
+                    resourceName,
+                    envVar);
+                    throw new RuntimeException(msg);
+            }
+            resourceName = tempResName;
         }
         try {
             return new FileInputStream(new File(resourceName)); // first, try to get the resource as it is

@@ -9,7 +9,7 @@ import org.junit.Test;
 public class OneConfigTest {
     @Test
     public void testSmokeTest() {
-        OneConfig cfg = new OneConfig(ResourceLoader.getResourceAsString("TestStore/1.json"));
+        OneConfig cfg = new OneConfig(ResourceLoader.getResourceAsString("TestStores/config.json"));
         String result;
 
         result = cfg.get("myapp.deployment");
@@ -20,7 +20,7 @@ public class OneConfigTest {
 
     @Test
     public void testRecursiveReplaceSimple() {
-        OneConfig cfg = new OneConfig(ResourceLoader.getResourceAsString("TestStore/1.json"));
+        OneConfig cfg = new OneConfig(ResourceLoader.getResourceAsString("TestStores/config.json"));
         String result = cfg.get("db.pwd");
 
         assertEquals("--sec2--", result);
@@ -28,7 +28,7 @@ public class OneConfigTest {
 
     @Test
     public void testRecursiveReplaceFull() {
-        OneConfig cfg = new OneConfig(ResourceLoader.getResourceAsString("TestStore/1.json"));
+        OneConfig cfg = new OneConfig(ResourceLoader.getResourceAsString("TestStores/config.json"));
         String result = cfg.get("db.connectionString");
 
         assertEquals("server=--sec1--;vip=172.11.12.13;transactionSupport=true;pwd=--sec2--;OneConfig=is_cool;--root_sec1--", result);

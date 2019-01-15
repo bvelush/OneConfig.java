@@ -14,7 +14,7 @@
     <modules>
         <module>oneconfig.core</module>
         <module>utils</module>
-        <module>demo</module>
+        <module>jssutil</module>
     </modules>
 
     <build>

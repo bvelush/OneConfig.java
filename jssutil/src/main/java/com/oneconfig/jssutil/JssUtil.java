@@ -1,4 +1,4 @@
-package com.oneconfig.demo;
+package com.oneconfig.jssutil;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,7 +22,7 @@ import org.apache.commons.io.IOUtils;
 // running example:
 // java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000 -jar demo\target\demo-1.0-SNAPSHOT-pkg.jar -j <json
 // path> -k <path to keystore> -o <output path>
-public class Demo {
+public class JssUtil {
     public static final String CERTNAME = "deployment_enc";
     public static final String CERTPWD = "";
 

@@ -3,12 +3,12 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.oneconfig</groupId>
-    <artifactId>demo</artifactId>
+    <artifactId>jssutil</artifactId>
     <!-- <packaging>war</packaging> -->
 
     <version>1.0-SNAPSHOT</version>
 
-    <name>demo</name>
+    <name>jssutil</name>
     <build>
         <plugins>
             <plugin>
@@ -16,7 +16,7 @@
                 <artifactId>executable-packer-maven-plugin</artifactId>
                 <version>1.0.1</version>
                 <configuration>
-                    <mainClass>com.oneconfig.demo.Demo</mainClass>
+                    <mainClass>com.oneconfig.jssutil.JssUtil</mainClass>
                 </configuration>
                 <executions>
                     <execution>
