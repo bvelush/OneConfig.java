@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.regex.Matcher;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.oneconfig.core.sensors.ISensor;
@@ -45,6 +45,7 @@ public class OneConfig {
     }
     // endregion allowDefaultSensorValue
 
+    // region Constructors
     public OneConfig() {
         try {
             String rawCfg = ResourceLoader.getResourceAsString("config.json", OneConfig.class);
@@ -70,22 +71,17 @@ public class OneConfig {
             throw new OneConfigException("Can't process json string", ex);
         }
     }
+    // endregion Constructors
 
-    // TODO have the getSensor(name) call
-
-    private String exOrDefault(String msg, Object... values) {
-        if (exceptionWhenWrongKey) {
-            throw new OneConfigException(String.format(msg, values));
-        } else {
-            return null;
-        }
+    public Set<String> getSensorNames() {
+        return sensors.keySet();
     }
 
-    private String exOrDefault(OneConfigException ex) {
-        if (exceptionWhenWrongKey) {
-            throw ex;
-        } else {
-            return null;
+    public String evaluateSensor(String sensorName) {
+        try {
+            return sensors.get(sensorName).evaluate();
+        } catch (Exception ex) {
+            throw new OneConfigException("Can't evaluate sensor '%s'. Make sure that sensor with this name is declared in the config", ex);
         }
     }
 
@@ -99,28 +95,6 @@ public class OneConfig {
             return exOrDefault(ex);
         } catch (Exception ex) {
             return exOrDefault("Can't get the value for the key '%s'. See the inner exception for details", ex);
-        }
-    }
-
-    private String resolveStoreResult(StoreResult result) {
-        if (result.isSensor()) {
-            String sensorName = result.getSensorName();
-            ISensor sensor = sensors.get(sensorName);
-            if (sensor == null) { // sensor with the name sensorName is not registered
-                throw new OneConfigException("Sensor '%s' is not found", sensorName);
-            }
-            String sensorValue = sensor.evaluate();
-            String matchingValue = result.getSensorCollection().get(sensorValue);
-            if (matchingValue == null) { // can't match the return of the sensor with the StoreResult collection of sensor values
-                if (allowDefaultSensorValue) { // if can't match the sensor return, try the default value
-                    matchingValue = Const.DEFAULT_SENSOR_VALUE;
-                } else {
-                    throw new OneConfigException("Can't match the value '%s' for the sensor '%s'", sensorValue, sensorName);
-                }
-            }
-            return matchingValue;
-        } else {
-            return result.getStrValue();
         }
     }
 
@@ -150,14 +124,6 @@ public class OneConfig {
         );
 
         return expandedReturn;
-    }
-
-    private String replaceKeys(String str) {
-        Matcher m = Str.RX_INLINE_CONFIGKEY.matcher(str);
-        // while (m.find()) {
-
-        // }
-        return null;
     }
 
     // region ----------- INIT ------------
@@ -201,7 +167,7 @@ public class OneConfig {
             }
         }
 
-        // ... another init parameters, like cache config goes here
+        // ... another init parameters, like cache config go here
     }
 
     private <T extends IInit> T initDynamicJsonClass(String name, JsonNode storeInit) {
@@ -225,4 +191,42 @@ public class OneConfig {
         }
     }
     // endregion ----------- INIT ------------
+
+    private String exOrDefault(String msg, Object... values) {
+        if (exceptionWhenWrongKey) {
+            throw new OneConfigException(String.format(msg, values));
+        } else {
+            return null;
+        }
+    }
+
+    private String exOrDefault(OneConfigException ex) {
+        if (exceptionWhenWrongKey) {
+            throw ex;
+        } else {
+            return null;
+        }
+    }
+
+    private String resolveStoreResult(StoreResult result) {
+        if (result.isSensor()) {
+            String sensorName = result.getSensorName();
+            ISensor sensor = sensors.get(sensorName);
+            if (sensor == null) { // sensor with the name sensorName is not registered
+                throw new OneConfigException("Sensor '%s' is not found", sensorName);
+            }
+            String sensorValue = sensor.evaluate();
+            String matchingValue = result.getSensorCollection().get(sensorValue);
+            if (matchingValue == null) { // can't match the return of the sensor with the StoreResult collection of sensor values
+                if (allowDefaultSensorValue) { // if can't match the sensor return, try the default value
+                    matchingValue = Const.DEFAULT_SENSOR_VALUE;
+                } else {
+                    throw new OneConfigException("Can't match the value '%s' for the sensor '%s'", sensorValue, sensorName);
+                }
+            }
+            return matchingValue;
+        } else {
+            return result.getStrValue();
+        }
+    }
 }
