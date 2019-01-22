@@ -44,7 +44,7 @@ public class ResourceLoader {
      * @param resourceName The name of the resources to load
      * @param callingClass The Class object of the calling object
      */
-    public static Iterator<URL> getResources(String resourceName, Class callingClass, boolean aggregate) throws IOException {
+    public static Iterator<URL> getResources(String resourceName, Class<?> callingClass, boolean aggregate) throws IOException {
         AggregateIterator<URL> iterator = new AggregateIterator<URL>();
         iterator.addEnumeration(Thread.currentThread().getContextClassLoader().getResources(resourceName));
 
@@ -68,6 +68,19 @@ public class ResourceLoader {
         return iterator;
     }
 
+    public static String urlToAbsolutePath(URL url) {
+        try {
+            File f = new File(url.toURI());
+            return f.getAbsolutePath();
+        } catch (Exception ex) {
+            throw new RuntimeException(String.format("URL '%s' can't be converted to the absolute path", url.toString()), ex);
+        }
+    }
+
+    public static URL getResource(String resourceName) {
+        return getResource(resourceName, ResourceLoader.class);
+    }
+
     /**
      * Load a given resource.
      *
@@ -81,7 +94,7 @@ public class ResourceLoader {
      * @param resourceName The name IllegalStateException("Unable to call ")of the resource to load
      * @param callingClass The Class object of the calling object
      */
-    public static URL getResource(String resourceName, Class callingClass) {
+    public static URL getResource(String resourceName, Class<?> callingClass) {
         URL url = Thread.currentThread().getContextClassLoader().getResource(resourceName);
 
         if (url == null) {
@@ -111,7 +124,7 @@ public class ResourceLoader {
      * @param resourceName The name of the resource to load
      * @param callingClass The Class object of the calling object
      */
-    public static InputStream getResourceAsStream(String resourceName, Class callingClass) {
+    public static InputStream getResourceAsStream(String resourceName, Class<?> callingClass) {
         if (resourceName.startsWith(ENV_PREFIX)) {
             String envVar = resourceName.substring(ENV_PREFIX.length(), resourceName.length());
             String tempResName = System.getenv(envVar);
@@ -152,14 +165,13 @@ public class ResourceLoader {
      * @param resourceName The name of the resource to load
      * @param callingClass The Class object of the calling object
      */
-    public static String getResourceAsString(String resourceName, Class callingClass) {
+    public static String getResourceAsString(String resourceName, Class<?> callingClass) {
         try {
             return IOUtils.toString(getResourceAsStream(resourceName, callingClass));
         } catch (IOException ex) {
             throw new RuntimeException(String.format("Error loading resource '%s'", resourceName), ex);
         }
     }
-
 
     public static String getResourceAsString(String resourceName) {
         return getResourceAsString(resourceName, ResourceLoader.class);
@@ -180,7 +192,7 @@ public class ResourceLoader {
      * @param callingClass The Class object of the calling object
      * @throws ClassNotFoundException If the class cannot be found anywhere.
      */
-    public static Class loadClass(String className, Class callingClass) throws ClassNotFoundException {
+    public static Class<?> loadClass(String className, Class<?> callingClass) throws ClassNotFoundException {
         try {
             return Thread.currentThread().getContextClassLoader().loadClass(className);
         } catch (ClassNotFoundException e) {

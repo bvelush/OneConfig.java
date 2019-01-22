@@ -2,9 +2,6 @@ package com.oneconfig.utils.common;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.net.URL;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
@@ -34,9 +31,7 @@ public class ResourceLoaderTest {
     @Test
     public void testAbsolutePath() throws Exception {
         String resourceRelPath = "resourceloadertest1.txt";
-        URL url = Thread.currentThread().getContextClassLoader().getResource(resourceRelPath);
-        File f = new File(url.toURI());
-        String resourcePath = f.getAbsolutePath();
+        String resourcePath = ResourceLoader.urlToAbsolutePath(ResourceLoader.getResource(resourceRelPath));
 
         String content = ResourceLoader.getResourceAsString(resourcePath); // testing the absolute path (resourcePath), not the relative
         content = content.trim();
@@ -46,10 +41,7 @@ public class ResourceLoaderTest {
     @Test
     public void testEnvPath() throws Exception {
         String resourceRelPath = "resourceloadertest1.txt";
-        URL url = Thread.currentThread().getContextClassLoader().getResource(resourceRelPath);
-        File f = new File(url.toURI());
-        String resourcePath = f.getAbsolutePath();
-        environmentVariables.set("RESOURCE_PATH", resourcePath);
+        environmentVariables.set("RESOURCE_PATH", ResourceLoader.urlToAbsolutePath(ResourceLoader.getResource(resourceRelPath)));
 
         String content = ResourceLoader.getResourceAsString("env:RESOURCE_PATH");
         content = content.trim();
