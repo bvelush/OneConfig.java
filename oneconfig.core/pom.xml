@@ -2,74 +2,19 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>com.oneconfig</groupId>
     <artifactId>oneconfig-core</artifactId>
-    <!-- <packaging>war</packaging> -->
-
     <version>1.0-SNAPSHOT</version>
 
     <name>core</name>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
-                <inherited>true</inherited>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <meminitial>4096m</meminitial>
-                    <maxmem>4096m</maxmem>
-                    <compilerArgs>
-                        <arg>-XX:MaxPermSize=4096m</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.17</version>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <configuration>
-                            <configLocation>./src/main/resources/maven_checks.xml</configLocation>
-                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                            <encoding>UTF-8</encoding>
-                            <consoleOutput>true</consoleOutput>
-                            <failsOnError>true</failsOnError>
-                            <linkXRef>false</linkXRef>
-                        </configuration>
-                        <goals>
-                            <!-- <goal>help // to disable style checking temporarily. check to enable again</goal> -->
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+
+    <parent>
+        <groupId>com.oneconfig</groupId>
+        <artifactId>oneconfig</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -98,12 +43,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.60</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.oneconfig</groupId>
             <artifactId>oneconfig-utils</artifactId>
             <version>1.0-SNAPSHOT</version>
@@ -118,10 +57,68 @@
         </dependency>
 
     </dependencies>
-    <properties>
-        <jersey.version>2.26</jersey.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.17</version>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <configuration>
+                            <configLocation>../maven_checks.xml</configLocation>
+                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <encoding>UTF-8</encoding>
+                            <consoleOutput>true</consoleOutput>
+                            <failsOnError>true</failsOnError>
+                            <linkXRef>false</linkXRef>
+                        </configuration>
+                        <goals>
+                            <!-- <goal>help // to disable style checking temporarily. check to enable again</goal> -->
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
     <reporting>
         <plugins>
             <plugin>
