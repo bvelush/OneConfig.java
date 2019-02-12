@@ -1,3 +1,10 @@
 {
-    "todo-tree.flat": false
+    "todo-tree.flat": false,
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    },
+    "java.configuration.updateBuildConfiguration": "automatic"
 }
