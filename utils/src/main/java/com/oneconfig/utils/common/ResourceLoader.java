@@ -72,7 +72,8 @@ public class ResourceLoader {
         try {
             File f = new File(url.toURI());
             return f.getAbsolutePath();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             throw new RuntimeException(String.format("URL '%s' can't be converted to the absolute path", url.toString()), ex);
         }
     }
@@ -116,6 +117,11 @@ public class ResourceLoader {
         return url;
     }
 
+    public static String getResourcePath(String resourceName) {
+        URL resourceUrl = getResource(resourceName);
+        return urlToAbsolutePath(resourceUrl);
+    }
+
     /**
      * This is a convenience method to load a resource as a stream.
      *
@@ -132,22 +138,25 @@ public class ResourceLoader {
                 String msg = String.format(
                     "Error resolving the resource name '%s'. Make sure that environment variable '%s' is defined",
                     resourceName,
-                    envVar);
-                    throw new RuntimeException(msg);
+                    envVar
+                );
+                throw new RuntimeException(msg);
             }
             resourceName = tempResName;
         }
         try {
             return new FileInputStream(new File(resourceName)); // first, try to get the resource as it is
-        } catch (FileNotFoundException ex) {
+        }
+        catch (FileNotFoundException ex) {
             URL url = getResource(resourceName, callingClass); // if resourceName is not pointing to resource literally (for example, the relative
-                                                               // path is used), try discover it
+                                                              // path is used), try discover it
             if (url == null) {
                 throw new RuntimeException(String.format("Error finding resource '%s'", resourceName), ex);
             }
             try {
                 return url.openStream();
-            } catch (IOException ex2) {
+            }
+            catch (IOException ex2) {
                 throw new RuntimeException(String.format("Error loading resource '%s'", resourceName), ex2);
             }
         }
@@ -168,7 +177,8 @@ public class ResourceLoader {
     public static String getResourceAsString(String resourceName, Class<?> callingClass) {
         try {
             return IOUtils.toString(getResourceAsStream(resourceName, callingClass));
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             throw new RuntimeException(String.format("Error loading resource '%s'", resourceName), ex);
         }
     }
@@ -188,20 +198,23 @@ public class ResourceLoader {
      * <li>From the callingClass.getClassLoader()
      * </ul>
      *
-     * @param className    The name of the class to load
+     * @param className The name of the class to load
      * @param callingClass The Class object of the calling object
      * @throws ClassNotFoundException If the class cannot be found anywhere.
      */
     public static Class<?> loadClass(String className, Class<?> callingClass) throws ClassNotFoundException {
         try {
             return Thread.currentThread().getContextClassLoader().loadClass(className);
-        } catch (ClassNotFoundException e) {
+        }
+        catch (ClassNotFoundException e) {
             try {
                 return Class.forName(className);
-            } catch (ClassNotFoundException ex) {
+            }
+            catch (ClassNotFoundException ex) {
                 try {
                     return ResourceLoader.class.getClassLoader().loadClass(className);
-                } catch (ClassNotFoundException exc) {
+                }
+                catch (ClassNotFoundException exc) {
                     return callingClass.getClassLoader().loadClass(className);
                 }
             }
