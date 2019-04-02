@@ -50,7 +50,8 @@ public class OneConfig {
         try {
             String rawCfg = ResourceLoader.getResourceAsString("config.json", OneConfig.class);
             init(rawCfg);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             throw new OneConfigException("Can't process 'config.json'", ex);
         }
     }
@@ -58,7 +59,8 @@ public class OneConfig {
     public OneConfig(String jsonConfig) {
         try {
             init(jsonConfig);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             throw new OneConfigException("Can't process json string", ex);
         }
     }
@@ -67,7 +69,8 @@ public class OneConfig {
         try {
             String rawCfg = new String(Files.readAllBytes(configFilePath), charset);
             init(rawCfg);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             throw new OneConfigException("Can't process json string", ex);
         }
     }
@@ -80,7 +83,8 @@ public class OneConfig {
     public String evaluateSensor(String sensorName) {
         try {
             return sensors.get(sensorName).evaluate();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             throw new OneConfigException("Can't evaluate sensor '%s'. Make sure that sensor with this name is declared in the config", ex);
         }
     }
@@ -91,9 +95,11 @@ public class OneConfig {
         }
         try {
             return internalGet(key, 1, key);
-        } catch (OneConfigException ex) {
+        }
+        catch (OneConfigException ex) {
             return exOrDefault(ex);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             return exOrDefault("Can't get the value for the key '%s'. See the inner exception for details", ex);
         }
     }
@@ -104,7 +110,7 @@ public class OneConfig {
         }
         String storeName = ""; // by default, using the default store (it's name is "")
         String path = key; // assuming that storeName is not specified
-        if (key.startsWith("$")) { // the store is the first element of the key
+        if (key.startsWith("$")) { // key starting with $ will be understood as a store name
             storeName = Str.head(key).substring(1); // removing leading '$'
             path = Str.tail(key);
         }
@@ -186,7 +192,8 @@ public class OneConfig {
 
             instance.init(name, configObject);
             return instance;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             throw new OneConfigException(String.format("Can't initialize the class '%s'", name), ex);
         }
     }
